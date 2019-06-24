@@ -14,7 +14,7 @@ services:
       COS_LOCATION: ykt
       COS_BUCKET: challenges
       SECURE: "false"
-      INTERVAL: 30
+      INTERVAL: 150
   # currently, swarm mode doesn't support privileged flag; it will be supported soon. 
   #sf-collector:
   #  image: floripa.sl.cloud9.ibm.com/sf-collector:latest
