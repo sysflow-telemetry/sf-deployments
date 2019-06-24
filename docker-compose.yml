@@ -1,0 +1,34 @@
+version: "3.6"
+services:
+  sf-exporter:
+    image: floripa.sl.cloud9.ibm.com/sf-exporter:latest
+    deploy:
+      replicas: 1
+    secrets:
+      - cos_access_key
+      - cos_secret_key
+    volumes:
+      - /mnt/data:/mnt/data
+    environment:
+      COS_ENDPOINT: 9.59.150.60
+      COS_LOCATION: ykt
+      COS_BUCKET: challenges
+      SECURE: "false"
+      INTERVAL: 30
+  # currently, swarm mode doesn't support privileged flag; it will be supported soon. 
+  #sf-collector:
+  #  image: floripa.sl.cloud9.ibm.com/sf-collector:latest
+  #  privileged: true
+  #  deploy:
+  #    replicas: 1
+  #  volumes:
+  #    - /mnt/data:/mnt/data
+  #  environment:
+  #    NODE_NAME: challenges_portal
+  #    FILTER:  
+  #    INTERVAL: 30
+secrets:
+  cos_access_key:
+    external: true
+  cos_secret_key:
+    external: true

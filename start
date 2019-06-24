@@ -1,0 +1,7 @@
+#!/bin/bash
+sudo umount -l /mnt/data
+sudo mount -t tmpfs -o size=1024m tmpfs /mnt/data
+sudo docker pull floripa.sl.cloud9.ibm.com/sf-exporter:latest 
+sudo docker pull floripa.sl.cloud9.ibm.com/sf-collector:latest
+# TODO: add docker run for sf-collector here
+sudo docker stack deploy -c docker-compose.yml telemetry
