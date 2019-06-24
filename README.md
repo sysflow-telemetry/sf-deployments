@@ -4,6 +4,7 @@ This repository contains utility scripts to deploy a local Sysflow telemetry sta
 ## Deployment Instructions
 
 #### Add private registry certificate to docker client
+This step enables docker to pull the required images from the private registry in IRIS:
 > sudo mkdir -p /etc/docker/certs.d/floripa.sl.cloud9.ibm.com
 > sudo cp ca.crt /etc/docker/certs.d/floripa.sl.cloud9.ibm.com/ca.crt
 
