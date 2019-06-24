@@ -1,5 +1,6 @@
 #!/bin/bash
 sudo docker stop sf-collector
+sleep 3
 sudo docker rm sf-collector
 sudo docker stack rm telemetry
 
