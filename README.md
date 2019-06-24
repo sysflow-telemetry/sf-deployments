@@ -6,7 +6,7 @@ Create the docker secrets used to connect to the object store:
 > ./secrets
 
 ### Start telemetry stack 
-> ./start 
+> ./start researchportal 
 
 ### Stop telemetry stack
 > ./stop

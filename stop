@@ -1,5 +1,6 @@
 #!/bin/bash
-# TODO: add docker stop and rm for sf-collector here
+sudo docker stop sf-collector
+sudo docker rm sf-collector
 sudo docker stack rm telemetry
 
 

@@ -3,5 +3,10 @@ sudo umount -l /mnt/data
 sudo mount -t tmpfs -o size=1024m tmpfs /mnt/data
 sudo docker pull floripa.sl.cloud9.ibm.com/sf-exporter:latest 
 sudo docker pull floripa.sl.cloud9.ibm.com/sf-collector:latest
-# TODO: add docker run for sf-collector here
+sudo docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
+                      -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
+                      -v /usr:/host/usr:ro -v /mnt/data:/host/mnt/data \
+                      -e INTERVAL=300 \
+                      -e NODE_NAME="${1}" \
+                      --rm -i -t  floripa.sl.cloud9.ibm.com/sf-collector
 sudo docker stack deploy -c docker-compose.yml telemetry
