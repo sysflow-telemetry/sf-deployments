@@ -46,7 +46,7 @@ printf "<cos secret key>" | sudo docker secret create cos_secret_key -
 ```
 #### Start telemetry stack 
 ```
-./start rschportal 
+./start <exporter_name> 
 ```
 #### Stop telemetry stack
 ```
