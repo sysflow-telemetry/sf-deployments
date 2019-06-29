@@ -33,6 +33,7 @@ sudo cp ca.crt /etc/docker/certs.d/floripa.sl.cloud9.ibm.com/ca.crt
 ./stop_probe
 ```
 ### Full telemetry stack deployment (collector probe and exporter)
+> Note: skip this if deploying locally.
 
 #### Create docker secrets
 If the node (host) isn't part of a docker swarm, initialize a local one (required for docker secrets):
