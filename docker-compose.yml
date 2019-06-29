@@ -12,8 +12,8 @@ services:
     environment:
       COS_ENDPOINT: 9.59.150.60
       COS_LOCATION: ykt
-      COS_BUCKET: challenges
-      NODE_IP: ptl
+      COS_BUCKET: challenges # can be set to any value
+      NODE_IP: ptl # can be set to any value
       SECURE: "false"
       INTERVAL: 150
   # currently, swarm mode doesn't support privileged flag; it will be supported soon. 

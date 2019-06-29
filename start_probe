@@ -1,0 +1,14 @@
+#!/bin/bash
+sudo umount -l /mnt/data
+sudo mkdir -p /mnt/data
+sudo mount -t tmpfs -o size=1024m tmpfs /mnt/data
+sudo docker pull floripa.sl.cloud9.ibm.com/sf-collector:latest
+sudo docker run -d --privileged --name sf-collector  -v /var/run/docker.sock:/host/var/run/docker.sock \
+                      -v /dev:/host/dev -v /proc:/host/proc:ro -v /boot:/host/boot:ro -v /lib/modules:/host/lib/modules:ro \
+                      -v /usr:/host/usr:ro -v /mnt/data:/mnt/data \
+                      -e INTERVAL=60 \
+                      -e NODE_NAME="${HOSTNAME}" \
+                      -e FILTER="-f \"container.name!=sf-collector and not (container.name contains sf-exporter)\"" \
+                      --rm -i -t  floripa.sl.cloud9.ibm.com/sf-collector
+
+
