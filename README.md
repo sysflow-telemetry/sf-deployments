@@ -2,7 +2,7 @@
 This repository contains utility scripts to deploy a local Sysflow telemetry stack.
 
 ## Deployment Instructions
-A _local_ and a _full stack_ deployment models are described below. The local deployment stores collected traces on the local filesystem and the full stack deployment exportes the collected traces to a S3-compatible object store server. 
+A _local_ and a _full stack_ deployment models are described below. The local deployment stores collected traces on the local filesystem and the full stack deployment exports the collected traces to a S3-compatible object storage server. 
 
 #### Prerequisites
 To guarantee a smooth deployment, the kernel headers must be installed in the host operating system.
@@ -53,7 +53,7 @@ printf "<cos secret key>" | sudo docker secret create cos_secret_key -
 ./stop
 ```
 
-### Start an interactive testing environment for trace inspection
+### Interactive testing environment for trace inspection
 
 #### Start and enter testing environment
 Execute the script below from the root directory of this repository.
