@@ -28,6 +28,7 @@ sudo cp ca.crt /etc/docker/certs.d/floripa.sl.cloud9.ibm.com/ca.crt
 ```
 ./start_probe 
 ```
+> Tip: add container.type!=host to FILTER string located inside this script to filter out host (non-containerized) events.
 #### Stop telemetry  probe
 ```
 ./stop_probe
