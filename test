@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo docker run --rm --name sftests -it -v "/mnt/data:/mnt/data" -v "$(pwd)/tests:/usr/local/sysflow/tests" --entrypoint "/bin/bash" floripa.sl.cloud9.ibm.com/sf-collector:testing
+sudo docker run --rm --name sftests -it -v "/mnt/data:/mnt/data" -v "$(pwd)/tests:/usr/local/sysflow/tests" --entrypoint "/bin/sh" floripa.sl.cloud9.ibm.com/sf-exporter:latest

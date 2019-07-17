@@ -67,6 +67,6 @@ To inspect locally collected traces:
 sysprint /mnt/data/<trace name>
 ```
 
-To inspect sample traces (this particular sample is a slice of our Think 2019 node.js express attack demo; other ssamples can be found in the tests directory):
+To inspect sample traces (this particular sample is a slice of our Think 2019 node.js express attack demo; other samples can be found in the tests directory):
 ```
 sysprint tests/attacks/2018-07-16/mon.1531776712.sf
