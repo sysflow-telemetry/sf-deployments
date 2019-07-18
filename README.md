@@ -28,11 +28,25 @@ sudo cp ca.crt /etc/docker/certs.d/floripa.sl.cloud9.ibm.com/ca.crt
 ```
 ./start_probe 
 ```
+> Tip: add container.type!=host to FILTER string located inside this script to filter out host (non-containerized) events.
 #### Stop telemetry  probe
 ```
 ./stop_probe
 ```
-### Full telemetry stack deployment (collector probe and exporter)
+
+#### RSyslog exporter
+If exporting to rsyslog (e.g., QRadar), specify the IP and port of the remote syslog server:
+```
+sudo docker run --name sf-exporter \
+    -e SYSLOG_HOST=<RSYSLOG IP> \
+    -e SYSLOG_PORT=<RSYSLOG PORT> \
+    -e NODE_IP=<EXPORTER HOST IP> \
+    -e INTERVAL=15 \
+    -e DIR=/mnt/data \
+    --mount type=bind,source=/mnt/data,destination=/mnt/data \
+    floripa.sl.cloud9.ibm.com/sf-exporter:latest
+```
+### Full telemetry stack deployment (collector probe and S3 exporter)
 > Note: skip this if deploying locally.
 
 #### Create docker secrets
@@ -45,7 +59,7 @@ Create the docker secrets used to connect to the object store:
 printf "<cos access key>" | sudo docker secret create cos_access_key -
 printf "<cos secret key>" | sudo docker secret create cos_secret_key -
 ```
-#### Start telemetry stack 
+#### Start telemetry stack
 ```
 ./start <exporter_name> 
 ```
