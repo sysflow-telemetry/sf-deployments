@@ -70,3 +70,15 @@ sysprint /mnt/data/<trace name>
 To inspect sample traces (this particular sample is a slice of our Think 2019 node.js express attack demo; other samples can be found in the tests directory):
 ```
 sysprint tests/attacks/2018-07-16/mon.1531776712.sf
+
+To inspect traces exported to an object store:
+```
+sysprint -i cos -c <cos_endpoint> -a <cos_access_key> -s <cos_secret_key> <bucket_name>
+```
+
+For more usage and formatting options:
+```
+sysprint -h
+```
+
+
