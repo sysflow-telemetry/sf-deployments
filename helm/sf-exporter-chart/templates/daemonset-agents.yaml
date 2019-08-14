@@ -1,0 +1,196 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: {{ template "sf-exporter-chart.fullname" . }}-agent
+  labels:
+    app: {{ template "sf-exporter-chart.fullname" . }}
+    chart: "{{ .Chart.Name }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "sf-exporter-chart.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "sf-exporter-chart.fullname" . }}
+        chart: "{{ .Chart.Name }}"
+        release: "{{ .Release.Name }}"
+        tier: agent
+    spec:
+      {{- with .Values.resources }}
+      resources:
+      {{- toYaml . | nindent 12 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- if .Values.registry.secretName }}
+      {{- if ne .Values.registry.secretName ""}}
+      imagePullSecrets:
+      - name: {{ .Values.registry.secretName }}
+      {{- end }}
+    {{- end }}
+      containers:
+      - name: sfcollector
+        image: {{ .Values.sfcollector.repository }}:{{ .Values.sfcollector.tag }}
+        imagePullPolicy: {{ .Values.sfcollector.imagePullPolicy | default "" | quote }}
+        #command: ["/bin/sh"]
+        #args: ["-c", "/docker-entrypoint.sh; /usr/local/sysflow/bin/sysporter -G {{ .Values.sfcollector.interval }} -w {{ .Values.sfcollector.outFile }} {{ .Values.sfcollector.cFlag }} "]
+        env:
+        - name: FILTER
+          value: {{ .Values.sfcollector.filter }}
+        - name: INTERVAL
+          value: "{{ .Values.sfcollector.interval }}"
+        - name: OUTPUT
+          value: {{ .Values.sfcollector.outDir }}
+        - name: LOCATION
+          value: {{ .Values.sfexporter.cosLocation }}
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: POD_UUID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+        volumeMounts:
+        - mountPath: {{ .Values.outDir }}
+          name: data
+        - mountPath: /host/var/run/docker.sock
+          name: dockersock
+        - mountPath: /host/dev
+          name: dev
+        - mountPath: /host/proc
+          name: proc
+          readOnly: true
+        - mountPath: /host/boot
+          name: boot
+          readOnly: true
+        - mountPath: /host/lib/modules
+          name: modules
+          readOnly: true
+        - mountPath: /host/usr
+          name: usr
+          readOnly: true
+        securityContext:
+          privileged: true
+      - name: sfexporter
+        image: {{ .Values.sfexporter.repository }}:{{ .Values.sfexporter.tag }}
+        imagePullPolicy: {{ .Values.sfexporter.imagePullPolicy | default "" | quote }}
+        volumeMounts:
+        - mountPath: {{ .Values.outDir }}
+          name: data
+        - mountPath: "/run/secrets/k8s"
+          name: secrets
+          subpath: k8s
+        #command: ["python"]
+        #args: ["/usr/local/monitor/monitor.py",  "--host={{ .Values.sfexporter.cosURL }}", "--port={{ .Values.sfexporter.port }}",  "--scaninterval={{ .Values.sfexporter.scanInterval }}", "--dir={{ .Values.outDir }}", "--bucket={{ .Values.sfexporter.cosBucket }}", "--location={{ .Values.sfexporter.location }}", "--accesskey={{ .Values.sfexporter.accessKey }}", "--secretkey={{ .Values.sfexporter.secretKey }}"]
+        #args: ["/usr/local/exporter/exporter.py",  "--host={{ .Values.sfexporter.cosEndpoint }}", "--port={{ .Values.sfexporter.cosPort }}",  "--scaninterval={{ .Values.sfexporter.scanInterval }}", "--dir={{ .Values.outDir }}", "--bucket={{ .Values.sfexporter.cosBucket }}", "--location={{ .Values.sfexporter.cosLocation }}"]
+        env:
+        - name: COS_ENDPOINT
+          value: {{ .Values.sfexporter.cosEndpoint }}
+        - name: COS_PORT
+          value: "{{ .Values.sfexporter.cosPort }}"
+        - name: INTERVAL 
+          value: "{{ .Values.sfexporter.interval }}"
+        - name: COS_BUCKET
+          value: {{ .Values.sfexporter.cosBucket }}
+        - name: COS_LOCATION
+          value: {{ .Values.sfexporter.cosLocation }}
+        - name: DIR
+          value: {{ .Values.outDir }}
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: POD_UUID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+      #nodeSelector:
+      #  kubernetes.io/hostname: 10.187.39.243
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ template "sf-exporter-chart.fullname" . }}-secrets
+          items:
+          - key: cos_access_key
+            path: "cos_access_key"
+          - key: cos_secret_key
+            path: "cos_secret_key"
+      - name: data
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ .Values.tmpfsSize }}
+      #- name: data
+      #  hostPath:
+      #    path: /mnt/data
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: proc
+        hostPath:
+          path: /proc
+      - name: boot
+        hostPath:
+          path: /boot
+      - name: modules
+        hostPath:
+          path: /lib/modules
+      - name: usr
+        hostPath:
+          path: /usr

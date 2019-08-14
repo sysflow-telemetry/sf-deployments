@@ -1,0 +1,58 @@
+# Default values for sysporter-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+registry:
+  secretName: container-insights-secret
+
+
+sfcollector:
+  repository: us.icr.io/csa-ci/sysporter
+  tag: runtime 
+  imagePullPolicy: Always
+  interval: 300
+  outDir: /mnt/data/
+  filter: "-f \"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector and container.name!=sftestharness and container.name!=skydive-agent\""
+#-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"
+sfexporter:
+  repository: us.icr.io/seccloud/sf-exporter
+  tag: latest
+  imagePullPolicy: Always
+  cosEndpoint: s3.us-south.objectstorage.service.networklayer.com
+  cosPort: 443
+  interval: 5
+  cosBucket: test-sf-ch-research-dev
+  cosLocation: us-south
+  cosAccessKey: "cos access key"
+  cosSecretKey: "cos secret key"
+
+outDir: /mnt/data/
+nameOverride: "sfexporter"
+fullnameOverride: ""
+tmpfsSize: 500Mi
+
+resources: 
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
