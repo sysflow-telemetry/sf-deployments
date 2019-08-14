@@ -1,6 +1,6 @@
 # SysFlow Helm Charts
 
-This repository contains a set of helm charts used to deploy the sysflow collector, exporter, and analytics engine driver into
+The sf-deployments repository  contains a set of helm charts (under the helm directory) used to deploy the sysflow collector, exporter, and analytics engine driver into
 a K8s environment.  It also contains a test harness for testing the telemetry infrastructure against various workloads.  Think of
 helm as a package manager for deploying kubernetes pods and services into a cloud.  The charts tell Helm how to conduct these 
 deployments and allow the user to change a wide array of configurations.
