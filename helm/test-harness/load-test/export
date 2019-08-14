@@ -1,0 +1,5 @@
+#!/bin/bash
+sudo ibmcloud cr login
+sudo docker tag sftestharness:latest us.icr.io/seccloud/sftestharness
+sudo docker push us.icr.io/seccloud/sftestharness
+sudo ibmcloud cr image-list

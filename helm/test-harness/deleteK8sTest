@@ -1,0 +1,1 @@
+helm del --purge sf-k8s-testharness --tls

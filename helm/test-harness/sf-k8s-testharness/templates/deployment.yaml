@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    app: {{ .Values.name }}
+    app.kubernetes.io/name: {{ .Values.name }}
+    helm.sh/chart: {{ include "sf-k8s-testharness.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  serviceName: {{ .Values.name }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+      app.kubernetes.io/name: {{ .Values.name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+        app.kubernetes.io/name: {{ .Values.name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Values.name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: {{ .Values.name }}
+              containerPort: {{ .Values.service.targetPort }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if .Values.image.secretName }}
+      {{- if ne .Values.image.secretName ""}}
+      imagePullSecrets:
+      - name: {{ .Values.image.secretName }}
+      {{- end }}
+    {{- end }}

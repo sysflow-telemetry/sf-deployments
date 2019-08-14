@@ -1,0 +1,2 @@
+#!/bin/bash
+helm install --tls --set service.targetPort=8085 --set service.port=8085 --set replicaCount=1 --set name=pyserver --set image.repository=us.icr.io/seccloud/pyserver  --set image.tag=latest --name=pyserver --debug sf-k8s-testharness

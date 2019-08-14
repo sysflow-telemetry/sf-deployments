@@ -1,0 +1,2 @@
+#!/bin/bash
+helm install --tls --set service.targetPort=3000 --set service.port=3000 --set replicaCount=5 --set name=nodejs --set image.repository=us.icr.io/seccloud/vulnerable-nodejs  --set image.tag=latest --name=sf-k8s-testharness --debug sf-k8s-testharness

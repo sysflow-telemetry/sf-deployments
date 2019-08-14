@@ -1,0 +1,2 @@
+#!/bin/bash
+helm install --tls --set replicaCount=1 --set name=sftestharness --set image.repository=us.icr.io/seccloud/sftestharness  --set image.tag=latest --name=sftestharness --debug sf-load-tester-helm

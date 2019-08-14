@@ -1,0 +1,18 @@
+{
+  "name": "web-attack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "attack.js",
+  "scripts": {
+    "run": "node attack.js"
+  },
+  "author": "Marc Ph. Stoecklin",
+  "dependencies": {
+    "command-line-args": "^5.0.2",
+    "command-line-usage": "^5.0.5",
+    "cookie-parser": "^1.4.3",
+    "escape-html": "^1.0.3",
+    "node-serialize": "0.0.4",
+    "request": "^2.87.0"
+  }
+}

@@ -1,0 +1,2 @@
+#!/bin/bash
+docker run --rm --name deliver-server -p 8085:8085 py-deliver-server
