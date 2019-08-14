@@ -1,0 +1,99 @@
+#!/bin/bash
+
+
+if [ "$#" -ne 6 ]; then
+    echo "Required arguments missing!"
+    echo "Usage : ./network-insight-install.sh <cos_region> <iam_api_key> <ae_user> <ae_password> <ae_endpoint> <kp_instance_id>"
+    echo "<cos_region> value is either us-south or eu-gb"
+    echo "<iam_api_key> is the api key present in iam service credentials"
+    echo "<ae_user> is the analytics engine user"
+    echo "<ae_password> is the analytics engine password"
+    echo "<ae_endpoint> is the analytics engine endpoint"
+    echo "<kp_instance_id> is the key protect instance id"
+    exit 1
+fi
+
+cosRegion=$1
+iamApiKey=$2
+aeUser=$3
+aePassword=$4
+aeEndpoint=$5
+kpInstanceId=$6
+
+cosEndpoint="https://s3.$cosRegion.cloud-object-storage.appdomain.cloud"
+#iamEndpoint="https://iam.cloud.ibm.com"
+
+# Don't run if any of the prerequisites are not installed.
+prerequisites=( "kubectl" "helm" )
+for i in "${prerequisites[@]}"
+do
+  isExist=$(command -v $i)
+  if [ -z "$isExist" ]
+  then
+    echo "$i not installed. Please install the required pre-requisites first (kubectl, helm)"
+    exit 1
+  fi
+done
+
+tls='--tls'
+enabled='N'
+tlsStatus=$(helm ls 2>&1)
+if [[ "$tlsStatus" != "Error: transport is closing" ]]; then
+    read -p 'Warning: Helm TLS is not enabled. Do you want to continue? [y/N] ' enabled
+    if [ "$enabled" == "y" ]
+    then
+        helm init
+        echo "Sleeping for 10 seconds so that tiller pod is ready"
+        sleep 10
+        tls=''
+    else
+        echo "Setup helm TLS. Follow https://github.com/helm/helm/blob/master/docs/tiller_ssl.md"
+        exit 1
+    fi
+fi
+
+nsCreateCmd=$(kubectl create namespace security-advisor-insights 2>&1)
+if [[ "$nsCreateCmd" =~ "already exists" ]]; then
+    echo "Warning: Namespace 'security-advisor-insights' already exist. Proceeding with the same."
+else
+    echo "Namespace 'security-advisor-insights' created successfully"
+fi
+
+#NOTE:  You need to set up a secret in the security advisors namespace so that the kube file can pull images from the IBM repo.  As a result, we pull a default secret with
+#the dockerconfigjson attribute in it... and then specify the secretName in the imagePullSecret of the kube deployment.
+#https://github.com/helm/helm/blob/master/docs/charts_tips_and_tricks.md#creating-image-pull-secrets
+#bluemixSecretCreateCmd=$(kubectl  get secret  bluemix-default-secret-international  -o yaml | sed "s/default/security-advisor-insights/g" | kubectl -n security-advisor-insights  create -f - 2>&1)
+
+#if [[ "$bluemixSecretCreateCmd" =~ "created" ]]; then
+#    echo "Secret 'bluemix-security-advisor-insights-secret-international' created successfully"
+#elif [[ "$bluemixSecretCreateCmd" =~ "already exists" ]]; then
+#    echo "Secret 'bluemix-security-advisor-insights-secret-international' exists"
+#else
+#    echo "Error creating secret 'bluemix-security-advisor-insights-secret-international'"
+#    exit 1
+#fi
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+#checkSecretExists=$(kubectl  get secret container-insights-secret --namespace=security-advisor-insights 2>&1)
+
+#if [[ "$checkSecretExists" =~ "(NotFound): secrets" ]]; then
+#TOKEN=$(ibmcloud cr token-add --description "Container registry secret for container insights" --non-expiring -q 2>&1)
+#kubectl --namespace security-advisor-insights create secret docker-registry container-insights-secret  --docker-server=<registry_url> --docker-username=token --docker-password=<token_value> --docker-email=<docker_email>
+#else
+#   echo "Secrets vault container-insights-secret already exists...will use this vault";
+#fi
+#-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+#helmInstallCmd=$(helm install $tls -n  sf-analytics-chart -f sf-analytics-chart/values.yaml.local --namespace security-advisor-insights --set sfanalytics.cosApiKey=$cosApiKey --set sfanalytics.cosServiceId=$cosServiceId --set sfanalytics.cosEndpoint=$cosEndpoint --set sfanalytics.cosLocation=$cosRegion --set sfanalytics.iamApiKey=$iamApiKey --set sfanalytics.aeEndpoint=$aeEndpoint --set sfanalytics.aeUser=$aeUser --set sfanalytics.aePwd=$aePassword --debug sf-analytics-chart --timeout 400 2>&1)
+helm install $tls -n  sf-analytics-chart -f sf-analytics-chart/values.yaml.local --namespace security-advisor-insights --set sfanalytics.cosEndpoint=$cosEndpoint --set sfanalytics.cosLocation=$cosRegion --set sfanalytics.iamApiKey=$iamApiKey --set sfanalytics.aeEndpoint=$aeEndpoint --set sfanalytics.aeUser=$aeUser --set sfanalytics.aePwd=$aePassword --set sfanalytics.kpInstanceId=$kpInstanceId --debug sf-analytics-chart
+
+#helmInstallCmd=$(helm install $tls -n network-insights network-insights-chart --namespace security-advisor-insights -f network-insights-values.yaml --wait --timeout 400 2>&1)
+#helmStatus=$(helm status sf-analytics-chart -o json $tls | yq r - info.status.code)
+#if [[ "$helmStatus" == "1" && "$helmInstallCmd" != *"Error"* ]]; then
+#    echo "Network insights helm chart installation successful!"
+#else
+#    echo "$helmInstallCmd"
+#    echo "Network insights helm chart installation Failed!"
+#fi

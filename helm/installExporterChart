@@ -1,0 +1,153 @@
+#!/bin/bash
+
+
+if [ "$#" -ne 3 ]; then
+    echo "Required arguments missing!"
+    echo "Usage : ./installExporterChart <cos_region> <cos_access_key> <cos_secret_key>"
+    echo "<cos_region> value is either us-south or eu-gb"
+    echo "<cos_access_key> is the access key present in COS service credentials"
+    echo "<cos_secret_key> is the secret key present in COS service credentials"
+    exit 1
+fi
+
+cosRegion=$1
+cosAccessKey=$2
+cosSecretKey=$3
+
+cosEndpoint="s3.$cosRegion.cloud-object-storage.appdomain.cloud"
+#cosEndpoint="s3.$cosRegion.objectstorage.softlayer.net"
+#iamEndpoint="https://iam.cloud.ibm.com"
+
+# Don't run if any of the prerequisites are not installed.
+prerequisites=( "kubectl" "helm" )
+for i in "${prerequisites[@]}"
+do
+  isExist=$(command -v $i)
+  if [ -z "$isExist" ]
+  then
+    echo "$i not installed. Please install the required pre-requisites first (kubectl, helm)"
+    exit 1
+  fi
+done
+
+# Get cluster info
+#kubectl get cm cluster-info -n kube-system -o yaml | yq r - data[cluster-config.json] > cluster-config.yaml
+#cluster_id=$(yq r cluster-config.yaml | yq r - cluster_id)
+#cluster_pay_tier=$(yq r cluster-config.yaml | yq r - cluster_pay_tier)
+#account_id=$(yq r cluster-config.yaml | yq r - account_id)
+#bucketName="sa.$account_id.telemetric.$cos_region"
+#subnet=""
+#worker_ips=""
+
+# Check for the OS type and set executable accordingly.
+#osType=$(uname)
+#if [ "$osType" = "Linux" ]
+#then
+  # Running on a Linux variant.
+#  encode="base64 -w 0"
+#else
+  # Running on macOS.
+#  encode="base64"
+#fi
+
+#ACCESS_TOKEN=$(curl -s -X POST \
+#-H "Content-Type: application/x-www-form-urlencoded" \
+#-H "Accept: application/json" \
+#-d "grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey&apikey=$cos_api_key" \
+#"$iamEndpoint/identity/token" | yq r - access_token)
+
+#echo "The Access Token is $ACCESS_TOKEN"
+
+#bucketStatus=$(curl -s -X GET -H "Authorization: Bearer $ACCESS_TOKEN" $cosEndpoint/$bucketName)
+#if [[ "$bucketStatus" =~ "The specified bucket does not exist" ]]; then
+#    echo "Bucket $bucketName does not exists. Please create one using the Security Advisor UI"
+#    exit 1
+#fi
+
+#cos_region_encoded=$(echo -n $cos_region | $encode)
+#cos_api_key_encoded=$(echo -n $cos_api_key | $encode)
+#bucketName_encoded=$(echo -n $bucketName | $encode)
+#cosEndpoint_encoded=$(echo -n $cosEndpoint | $encode)
+#iamEndpoint_encoded=$(echo -n $iamEndpoint | $encode)
+
+#yq w -i secret-template.yaml data.cosEndpoint $cosEndpoint_encoded
+#yq w -i secret-template.yaml data.cosApiKey $cos_api_key_encoded
+#yq w -i secret-template.yaml data.bucketName $bucketName_encoded
+#yq w -i secret-template.yaml data.iamEndpoint $iamEndpoint_encoded
+#yq w -i secret-template.yaml data.cosRegion $cos_region_encoded
+
+# Check if the cluster is Lite or Paid.
+#if [ "$cluster_pay_tier" != "free" ]
+#then
+#  kubectl get cm -n kube-system -o yaml ibm-cloud-provider-vlan-ip-config > vlan-ip-config.yaml
+
+  # Obtain cluster public subnet.
+#  isTrue=$(yq r vlan-ip-config.yaml data[vlanipmap.json] | yq r - vlans[0].subnets[0].is_public)
+
+#  if [ $isTrue = "true" ]
+#  then
+#    subnet=$(yq r vlan-ip-config.yaml data[vlanipmap.json] | yq r - vlans[0].subnets[0].cidr)
+#  else
+#    subnet=$(yq r vlan-ip-config.yaml data[vlanipmap.json] | yq r - vlans[1].subnets[0].cidr)
+#  fi
+#fi
+#column_number=$(kubectl get nodes -o wide | awk 'NR == 1 { if ($7 == "EXTERNAL-IP") print 7 ; else  print 6 }')
+
+#if [ "$column_number" == 7 ]
+#then
+#  worker_ips=$(kubectl get nodes -o wide | awk 'NR > 1  {print $7 "/32"}' | tr '\n' ' ')
+#else
+#  worker_ips=$(kubectl get nodes -o wide | awk 'NR > 1  {print $6 "/32"}' | tr '\n' ' ')
+#fi
+#cluster_vms_skydive="10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 $worker_ips$subnet"
+
+#yq w -i network-insights-values.yaml env[12].value "$cluster_vms_skydive"
+#yq w -i network-insights-values.yaml env[10].value "$cluster_id"
+
+tls='--tls'
+enabled='N'
+tlsStatus=$(helm ls 2>&1)
+if [[ "$tlsStatus" != "Error: transport is closing" ]]; then
+    read -p 'Warning: Helm TLS is not enabled. Do you want to continue? [y/N] ' enabled
+    if [ "$enabled" == "y" ]
+    then
+        helm init
+        echo "Sleeping for 10 seconds so that tiller pod is ready"
+        sleep 10
+        tls=''
+    else
+        echo "Setup helm TLS. Follow https://github.com/helm/helm/blob/master/docs/tiller_ssl.md"
+        exit 1
+    fi
+fi
+
+nsCreateCmd=$(kubectl create namespace security-advisor-insights 2>&1)
+if [[ "$nsCreateCmd" =~ "already exists" ]]; then
+    echo "Warning: Namespace 'security-advisor-insights' already exist. Proceeding with the same."
+else
+    echo "Namespace 'security-advisor-insights' created successfully"
+fi
+
+bluemixSecretCreateCmd=$(kubectl  get secret  default-us-icr-io -o yaml | sed "s/default/security-advisor-insights/g" | kubectl -n security-advisor-insights  create -f - 2>&1)
+
+if [[ "$bluemixSecretCreateCmd" =~ "created" ]]; then
+    echo "Secret 'default-us-icr-io' created successfully"
+elif [[ "$bluemixSecretCreateCmd" =~ "already exists" ]]; then
+    echo "Secret 'default-us-icr-io' exists"
+else
+    echo "Error creating secret 'default-us-icr-io'"
+    exit 1
+fi
+
+#kubectl apply -f secret-template.yaml
+helm install $tls -n  sf-exporter-chart -f sf-exporter-chart/values.yaml.local --namespace security-advisor-insights --set sfexporter.cosAccessKey=$cosAccessKey --set sfexporter.cosSecretKey=$cosSecretKey --set sfexporter.cosEndpoint=$cosEndpoint --set sfexporter.cosLocation=$cosRegion --debug sf-exporter-chart
+#helmInstallCmd=$(helm install $tls -n  sf-exporter-chart -f sf-exporter-chart/values.yaml.local --namespace security-advisor-insights --set sfexporter.cosAccessKey=$cosAccessKey --set sfexporter.cosSecretKey=$cosSecretKey --set sfexporter.cosEndpoint=$cosEndpoint --set sfexporter.cosLocation=$cosRegion --debug sf-exporter-chart --wait --timeout 400 2>&1)
+#echo $helmInstallCmd
+#helmInstallCmd=$(helm install $tls -n network-insights network-insights-chart --namespace security-advisor-insights -f network-insights-values.yaml --wait --timeout 400 2>&1)
+#helmStatus=$(helm status network-insights -o json $tls | yq r - info.status.code)
+#if [[ "$helmStatus" == "1" && "$helmInstallCmd" != *"Error"* ]]; then
+#    echo "Network insights helm chart installation successful!"
+#else
+#    echo "$helmInstallCmd"
+#    echo "Network insights helm chart installation Failed!"
+#fi

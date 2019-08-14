@@ -1,0 +1,2 @@
+#!/bin/bash
+helm del --purge sf-exporter-chart --tls
