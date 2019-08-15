@@ -1,4 +1,4 @@
-# SysFlow Helm Charts
+# Helm Charts
 
 The sf-deployments repository  contains a set of helm charts (under the helm directory) used to deploy the sysflow collector, exporter, and analytics engine driver into
 a K8s environment.  It also contains a test harness for testing the telemetry infrastructure against various workloads.  Think of
