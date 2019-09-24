@@ -1,4 +1,4 @@
-## Docker Swarm
+## Docker Telemetry Stack
 This repository contains utility scripts to deploy a local Sysflow telemetry stack.
 
 #### Deployment
