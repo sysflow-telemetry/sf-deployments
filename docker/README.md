@@ -91,22 +91,22 @@ Run the `sysprint` script and point it to a trace file.
 
 ### Tabular output
 ```
-./sysflow /mnt/data/<trace name>
+./sysprint /mnt/data/<trace name>
 ```
 
 ### JSON output
 ```
-./sysflow -o json /mnt/data/<trace name>
+./sysprint -o json /mnt/data/<trace name>
 ```
 
 ### CSV output
 ```
-./sysflow -o csv /mnt/data/<trace name>
+./sysprint -o csv /mnt/data/<trace name>
 ```
 
 ### Inspect traces exported to an object store:
 ```
-sysprint -i cos -c <cos_endpoint> -a <cos_access_key> -s <cos_secret_key> <bucket_name>
+./sysprint -i cos -c <cos_endpoint> -a <cos_access_key> -s <cos_secret_key> <bucket_name>
 ```
 
 > Tip: see all options of the `sysprint` utility with `sysprint -h`
