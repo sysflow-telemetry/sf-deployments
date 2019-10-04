@@ -17,12 +17,6 @@ Or, on RHEL-like distributions:
 ```
 yum -y install kernel-devel-$(uname -r)
 ```
-### Add private registry certificate to docker client
-This step enables docker to pull the required images from the private registry in IRIS:
-```
-sudo mkdir -p /etc/docker/certs.d/floripa.sl.cloud9.ibm.com
-sudo cp ca.crt /etc/docker/certs.d/floripa.sl.cloud9.ibm.com/ca.crt
-```
 
 ### Setup
 
@@ -31,6 +25,13 @@ Clone the repository and navigate to this directory.
 ```
 git clone git@github.ibm.com:sysflow/sf-deployments.git
 cd sf-deployments/docker
+```
+
+### Add private registry certificate to docker client
+This step enables docker to pull the required images from the private registry in IRIS:
+```
+sudo mkdir -p /etc/docker/certs.d/floripa.sl.cloud9.ibm.com
+sudo cp ca.crt /etc/docker/certs.d/floripa.sl.cloud9.ibm.com/ca.crt
 ```
 
 ## Option 1: Local telemetry deployment: Sysflow collection probe only
