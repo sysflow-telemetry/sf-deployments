@@ -1,4 +1,6 @@
-## Docker Telemetry Stack
+## Sysflow Docker Telemetry Stack
+
+### Introduction
 This repository contains utility scripts to deploy a local Sysflow telemetry stack.
 
 #### Deployment
@@ -22,19 +24,34 @@ sudo mkdir -p /etc/docker/certs.d/floripa.sl.cloud9.ibm.com
 sudo cp ca.crt /etc/docker/certs.d/floripa.sl.cloud9.ibm.com/ca.crt
 ```
 
-### Local telemetry deployment (collection probe only)
+#### Setup
+
+Clone the repository and navigate to this directory.
+
+```
+git clone git@github.ibm.com:sysflow/sf-deployments.git
+cd sf-deployments/docker
+```
+
+### Option 1: Local telemetry deployment: Sysflow collection probe only
+
+This deployment will install the Sysflow collection probe only, i.e., without an exporter to a data store (e.g., COS).  See below for the deploytment of the full telemetry stack.
 
 #### Start telemetry probe 
+Start the telemetry probe, which will be ran in a container.
+
+> Tip: add container.type!=host to FILTER string located inside this script to filter out host (non-containerized) events.
+
 ```
 ./start_probe 
 ```
-> Tip: add container.type!=host to FILTER string located inside this script to filter out host (non-containerized) events.
-#### Stop telemetry  probe
+
+#### Stop telemetry probe
 ```
 ./stop_probe
 ```
 
-#### RSyslog exporter
+#### RSyslog exporter (optional)
 If exporting to rsyslog (e.g., QRadar), specify the IP and port of the remote syslog server:
 ```
 sudo docker run --name sf-exporter \
@@ -46,7 +63,8 @@ sudo docker run --name sf-exporter \
     --mount type=bind,source=/mnt/data,destination=/mnt/data \
     floripa.sl.cloud9.ibm.com/sf-exporter:latest
 ```
-### Full telemetry stack deployment (collector probe and S3 exporter)
+
+### Option 2: Full telemetry stack deployment: Sysflow collector probe and S3 exporter
 > Note: skip this if deploying locally.
 
 #### Create docker secrets
@@ -68,31 +86,38 @@ printf "<cos secret key>" | sudo docker secret create cos_secret_key -
 ./stop
 ```
 
-### Interactive testing environment for trace inspection
+### Sysflow trace inspection
+Run the `sysprint` script and point it to a trace file.
+
+#### Tabular output
+```
+./sysflow /mnt/data/<trace name>
+```
+
+#### JSON output
+```
+./sysflow -o json /mnt/data/<trace name>
+```
+
+#### CSV output
+```
+./sysflow -o csv /mnt/data/<trace name>
+```
+
+### Inspect traces exported to an object store:
+```
+sysprint -i cos -c <cos_endpoint> -a <cos_access_key> -s <cos_secret_key> <bucket_name>
+```
+
+> Tip: see all options of the `sysprint` utility with `sysprint -h`
+
+
+### Interactive test environment
 
 #### Start and enter testing environment
 Execute the script below from the root directory of this repository.
 ```
 ./test
-```
-
-To inspect locally collected traces:
-```
-sysprint /mnt/data/<trace name>
-```
-
-To inspect sample traces (this particular sample is a slice of our Think 2019 node.js express attack demo; other samples can be found in the tests directory):
-```
-sysprint tests/attacks/2018-07-16/mon.1531776712.sf
-
-To inspect traces exported to an object store:
-```
-sysprint -i cos -c <cos_endpoint> -a <cos_access_key> -s <cos_secret_key> <bucket_name>
-```
-
-For more usage and formatting options:
-```
-sysprint -h
 ```
 
 
