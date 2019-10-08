@@ -112,6 +112,13 @@ Run the `sysprint` script and point it to a trace file.
 
 > Tip: see all options of the `sysprint` utility with `sysprint -h`
 
+## Inspect example traces
+Sample trace files are mounted into `/usr/local/sysflow/tests` inside sysprint's environment.
+````
+./sysprint /usr/local/sysflow/tests/attacks/2018-07-16/mon.1531776712.sf
+```
+
+> Tip: other samples can be found in the tests directory
 
 ## Interactive test environment
 
