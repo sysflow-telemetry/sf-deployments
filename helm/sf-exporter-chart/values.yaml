@@ -30,7 +30,7 @@ sfcollector:
   imagePullPolicy: Always
   interval: 300
   outDir: /mnt/data/
-  filter: "-f \"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector and container.name!=sftestharness and container.name!=skydive-agent\""
+  filter: "-f \"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector\""
 #-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"
 sfexporter:
   repository: sysflowtelemetry/sf-exporter
