@@ -26,10 +26,8 @@ keywords:
   - Research
   - Analytics
   - System Events
-  - ICP
-  - SecAdvisor
 maintainers:
-  - name: IBM Research (YKT)
-    email: someemail@ibm.com
+  - name:  SysFlow Team
+    email: sysflow@us.ibm.com
 sources:
-  - https://github.ibm.com/sysmon/cscap/tree/master/src/sysflow
+  - https://github.com/sysflow-telemetry/

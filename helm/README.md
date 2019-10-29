@@ -1,7 +1,7 @@
 # Helm Charts
 
-The sf-deployments repository  contains a set of helm charts (under the helm directory) used to deploy the sysflow collector, exporter, 
-and analytics engine driver into a K8s environment.  It also contains a test harness for testing the telemetry infrastructure against 
+The sf-deployments repository  contains a set of helm charts (under the helm directory) used to deploy the sysflow collector, and exporter 
+into a K8s environment.  It also contains a test harness for testing the telemetry infrastructure against 
 various workloads.  Think of helm as a package manager for deploying kubernetes pods and services into a cloud.  The charts tell Helm 
 how to conduct these deployments and allow the user to change a wide array of configurations.
 
@@ -21,59 +21,47 @@ require changes to these charts.
 5. Create Cloud Object Store HMAC Access ID, and Secret Key.
     * For IBM Cloud Object store: https://cloud.ibm.com/docs/services/cloud-object-storage/iam?topic=cloud-object-storage-service-credentials 
 
-### Prerequisites to sf-analytics
-
-Currently, the SysFlow Analytics Pipeline container (i.e., sf-analytics docker container), has some elements that tie it to IBM Cloud 
-(i.e., it uses the ibmcloud ci tool to submit spark jobs).  However, the sf-analytics.jar library, built in the sf-analytics repository,
-should work on any cloud.  It is our goal to build containers that support the other clouds.
-
-1. To use analytics, Setup Spark instance on cloud.
-    * For IBM Cloud Analytics Engine (Spark instance) setup: https://cloud.ibm.com/docs/services/AnalyticsEngine?topic=AnalyticsEngine-IAE-overview
-2. Note Analytics Engine instance endpoint URL,  username and password during setup.
-
 ## Clone the Repository
 
 First, clone the repo with the following command:
 ```
-git clone git@github.ibm.com:sysflow/sf-helm-charts.git .
-cd sf-helm-charts
+git clone git@github.com:sysflow-telemetry/sf-deployments.git .
+cd sf-deployments/helm
 ```
 
 ## Helm - sf-exporter-chart 
 
-The sf-exporter-chart resides in the <code>sf-exporter-chart</code> folder.  The exporter chart is a kubernetes daemonset, which deploys the sf-collector, and the
-sf-exporter to each node in the cluster.  The sf-collector monitors the node, and writes sysflow to a shared mount <code>/mnt/data</code>.  The sf-exporter
-reads from the <code>/mnt/data</code> and pushes completed files to an S3 compliant object store for analysis before deleting them.  
+The sf-exporter-chart resides in the `sf-exporter-chart` folder.  The exporter chart is a kubernetes daemonset, which deploys the sf-collector, and the
+sf-exporter to each node in the cluster.  The sf-collector monitors the node, and writes sysflow to a shared mount `/mnt/data`.  The sf-exporter
+reads from the `/mnt/data` and pushes completed files to an S3 compliant object store for analysis before deleting them.  
 
-An install script called <code>./installExporterChart</code> is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets.   To use it, first go into the sf-exporter-chart directory and copy <code>values.yaml</code> to <code>values.yaml.local</code> and begin tailoring this yaml to your environment.  Note that some of values set in here are passable through the installation script for safety reasons.
+An install script called `./installExporterChart` is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets.  
+ To use it, first go into the sf-exporter-chart directory and copy `values.yaml` to `values.yaml.local` and begin tailoring this yaml to your environment.  
+Note that some of values set in here are passable through the installation script for safety reasons.
 
 ```
 # Default values for sysporter-chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-registry:
-  secretName: container-insights-secret
-
-
 sfcollector:
-  repository: us.icr.io/csa-ci/sysporter
-  tag: runtime
+  repository: sysflowtelemetry/sf-collector 
+  tag: latest
   imagePullPolicy: Always
   interval: 300
   outDir: /mnt/data/
   filter: "-f \"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector and container.name!=skydive-agent\""
 sfexporter:
-  repository: us.icr.io/seccloud/sf-exporter
+  repository: sysflowtelemetry/sf-exporter
   tag: latest
   imagePullPolicy: Always
-  cosEndpoint: s3.us-south.objectstorage.service.networklayer.com
-  cosPort: 443
+  s3Endpoint: s3.us-south.objectstorage.service.networklayer.com
+  s3Port: 443
   interval: 5
-  cosBucket: test-sf-ch-research-dev
-  cosLocation: us-south
-  cosAccessKey: <cos access id>
-  cosSecretKey: <cos secret key>
+  s3Bucket: sysflow-bucket
+  s3Location: us-south
+  s3AccessKey: <s3 access id>
+  s3SecretKey: <s3 secret key>
 
 outDir: /mnt/data/
 nameOverride: "sfexporter"
@@ -95,33 +83,38 @@ tolerations: []
 affinity: {}
 ```
 Most of the defaults should work in any environment.  Ensure that the repository locations for both the sfcollector and sfexporter are pointing to the correct location.  The collector is
-currently set to rotating files in 5 min intervals (or 300 seconds).   The <code>/mnt/data/</code> is mapped to a tmpfs filesystem, and you can specify its size using the <code>tmpfsSize</code>.  
+currently set to rotating files in 5 min intervals (or 300 seconds).   The `/mnt/data/` is mapped to a tmpfs filesystem, and you can specify its size using the `tmpfsSize`.  
 CGroup resource limits can be set on the collector and exporter to limit resource usage.  These can be adjusted depending on requirements and resources limitations.
 
-Ensure that the <code>cosBucket</code> is set to the desired S3 bucket location.   The cosLocation, cosAccessKey and cosSecretKey are each passed in through the installation if you use it.
+Ensure that the `s3Bucket` is set to the desired S3 bucket location.   The `s3Location`, `s3AccessKey` and `s3SecretKey` and `s3Endpoint` are each passed in through the installation script if you use it.
 
 ```
-./installExporterChart <cos_region> <cos_access_id> <cos_secret_key>
+./installExporterChart <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint>
+   <s3_region> value is the region in the S3 compliant object store (e.g., us-south)
+   <s3_access_key> is the access key present in S3 compliant service credentials
+   <s3_secret_key> is the secret key present in S3 compliant service credentials
+   <s3_endpoint> is the address of the S3 compliant object store (e.g., s3.us-south.cloud-object-storage.appdomain.cloud)
 ```
 
-Note the install script installs the pods into a K8s namespace called <code>security-advisor-insights</code>
+
+Note the install script installs the pods into a K8s namespace called `sysflow`
 
 To check that the install worked, run:
 
 ```
-kubectl get pods -n security-advisor-insights
+kubectl get pods -n sysflow
 ```
 
 To check the log output of the collector container in a pod:
 
 ```
-kubectl logs -f -c sfcollector <podname>  -n security-advisor-insights
+kubectl logs -f -c sfcollector <podname>  -n sysflow
 ```
 
 To check the log output of the exporter container in a pod:
 
 ```
-kubectl logs -f -c sfexporter <podname>  -n security-advisor-insights
+kubectl logs -f -c sfexporter <podname>  -n sysflow
 ```
 
 To delete the exporter chart run:
@@ -130,89 +123,10 @@ To delete the exporter chart run:
 ./deleteExporterChart
 ```
 
-## Helm - sf-analytics-chart 
-
-The sf-analytics-chart helm chart is for deploying the SysFlow analytics framework driver into a k8s environment.  The driver is designed to launch spark-based analytics jobs at intervals to consume any SysFlow's pushed to an S3 compliant object store.   The current implementation of the helm chart assumes an IBM
-analytics engine (spark pipeline) is configured.  The helm chart and driver need modifications in order to work on a vanilla spark installation on another cloud -- we need to test this in the future.
-
-As with the exporter, there is an install script called <code>./installAnalyticsChart</code> is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets.   To use it, first go into the <code>sf-analytics-chart</code> directory and copy <code>values.yaml</code> to <code>values.yaml.local</code> and begin tailoring this yaml to your environment.  Note that some of values set in here are passable through the installation script for safety reasons.
-
-```
-# Default values for sysalyzer-chart.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
-replicaCount: 1
-
-image:
-  repository: us.icr.io/seccloud/sf-analytics
-  tag: latest
-  pullPolicy: Always
-  secretName: container-insights-secret
-
-nameOverride: ""
-fullnameOverride: sfanalytics
-
-sfanalytics:
-  iamEndpoint: "https://iam.cloud.ibm.com/identity/token"
-  iamApiKey: "iamAPIKey"
-  interval: 300
-  timeout: 5
-  cosBucket: "test-sf-ch-research-dev"
-  cosLocation: "us-south"
-  cosEndpoint: "s3.us-south.objectstorage.service.networklayer.com"
-  cosPort: 443
-  aeEndpoint: "https://chs-qea-159-mn001.us-south.ae.appdomain.cloud"
-  aeUpload: "True"
-  aeUser: "ae user"
-  aePwd: "ae pwd"
-  debug: "True"
-  kpInstanceId: "kp instance"
-  aeExecutorMem: "3g"
-  aeDriverMem: "3g"
-
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-```
-
-The install script takes 6 sensitive pieces of information.  Note in this case analytics engine refers to the IBM Analytics Engine, key protect = IBM key protect, and IAM refers to the IAM service credentials for IBM cloud:
-
-```
-Usage : ./installAnalyticsChart <cos_region> <iam_api_key> <ae_user> <ae_password> <ae_endpoint> <kp_instance_id>
-<cos_region> value is either us-south or eu-gb
-<iam_api_key> is the api key present in iam service credentials
-<ae_user> is the analytics engine user
-<ae_password> is the analytics engine password
-<ae_endpoint> is the analytics engine endpoint
-<kp_instance_id> is the key protect instance id
-```
-To delete the analytics chart run the following:
-
-```
-./deleteAnalyticsChart
-```
-
-
 ## Useful IBM Cloud commands:
 
 ### list all images in the registry
 ibmcloud cr image-list
-
-### list pods running in cluster in the security-advisor-insights namespace
-kubectl get pods -n security-advisor-insights
 
 ### get more information on a pod (why it failed for example)
 kubectl describe pod <pod name>

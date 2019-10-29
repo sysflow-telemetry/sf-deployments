@@ -74,7 +74,7 @@ spec:
         - name: OUTPUT
           value: {{ .Values.sfcollector.outDir }}
         - name: LOCATION
-          value: {{ .Values.sfexporter.cosLocation }}
+          value: {{ .Values.sfexporter.s3Location }}
         - name: NODE_NAME
           valueFrom:
             fieldRef:
@@ -134,19 +134,19 @@ spec:
           name: secrets
           subpath: k8s
         #command: ["python"]
-        #args: ["/usr/local/monitor/monitor.py",  "--host={{ .Values.sfexporter.cosURL }}", "--port={{ .Values.sfexporter.port }}",  "--scaninterval={{ .Values.sfexporter.scanInterval }}", "--dir={{ .Values.outDir }}", "--bucket={{ .Values.sfexporter.cosBucket }}", "--location={{ .Values.sfexporter.location }}", "--accesskey={{ .Values.sfexporter.accessKey }}", "--secretkey={{ .Values.sfexporter.secretKey }}"]
-        #args: ["/usr/local/exporter/exporter.py",  "--host={{ .Values.sfexporter.cosEndpoint }}", "--port={{ .Values.sfexporter.cosPort }}",  "--scaninterval={{ .Values.sfexporter.scanInterval }}", "--dir={{ .Values.outDir }}", "--bucket={{ .Values.sfexporter.cosBucket }}", "--location={{ .Values.sfexporter.cosLocation }}"]
+        #args: ["/usr/local/monitor/monitor.py",  "--host={{ .Values.sfexporter.s3URL }}", "--port={{ .Values.sfexporter.port }}",  "--scaninterval={{ .Values.sfexporter.scanInterval }}", "--dir={{ .Values.outDir }}", "--bucket={{ .Values.sfexporter.s3Bucket }}", "--location={{ .Values.sfexporter.location }}", "--accesskey={{ .Values.sfexporter.accessKey }}", "--secretkey={{ .Values.sfexporter.secretKey }}"]
+        #args: ["/usr/local/exporter/exporter.py",  "--host={{ .Values.sfexporter.s3Endpoint }}", "--port={{ .Values.sfexporter.s3Port }}",  "--scaninterval={{ .Values.sfexporter.scanInterval }}", "--dir={{ .Values.outDir }}", "--bucket={{ .Values.sfexporter.s3Bucket }}", "--location={{ .Values.sfexporter.s3Location }}"]
         env:
-        - name: COS_ENDPOINT
-          value: {{ .Values.sfexporter.cosEndpoint }}
-        - name: COS_PORT
-          value: "{{ .Values.sfexporter.cosPort }}"
+        - name: S3_ENDPOINT
+          value: {{ .Values.sfexporter.s3Endpoint }}
+        - name: S3_PORT
+          value: "{{ .Values.sfexporter.s3Port }}"
         - name: INTERVAL 
           value: "{{ .Values.sfexporter.interval }}"
-        - name: COS_BUCKET
-          value: {{ .Values.sfexporter.cosBucket }}
-        - name: COS_LOCATION
-          value: {{ .Values.sfexporter.cosLocation }}
+        - name: S3_BUCKET
+          value: {{ .Values.sfexporter.s3Bucket }}
+        - name: S3_LOCATION
+          value: {{ .Values.sfexporter.s3Location }}
         - name: DIR
           value: {{ .Values.outDir }}
         - name: NODE_NAME
@@ -184,10 +184,10 @@ spec:
         secret:
           secretName: {{ template "sf-exporter-chart.fullname" . }}-secrets
           items:
-          - key: cos_access_key
-            path: "cos_access_key"
-          - key: cos_secret_key
-            path: "cos_secret_key"
+          - key: s3_access_key
+            path: "s3_access_key"
+          - key: s3_secret_key
+            path: "s3_secret_key"
       - name: data
         emptyDir:
           medium: Memory

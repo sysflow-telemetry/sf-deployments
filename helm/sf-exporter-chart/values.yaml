@@ -22,28 +22,27 @@
 # Declare variables to be passed into your templates.
 
 registry:
-  secretName: container-insights-secret
-
+  secretName: ""
 
 sfcollector:
-  repository: us.icr.io/csa-ci/sysporter
-  tag: runtime 
+  repository: sysflowtelemetry/sf-collector
+  tag: latest
   imagePullPolicy: Always
   interval: 300
   outDir: /mnt/data/
   filter: "-f \"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector and container.name!=sftestharness and container.name!=skydive-agent\""
 #-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"
 sfexporter:
-  repository: us.icr.io/seccloud/sf-exporter
+  repository: sysflowtelemetry/sf-exporter
   tag: latest
   imagePullPolicy: Always
-  cosEndpoint: s3.us-south.objectstorage.service.networklayer.com
-  cosPort: 443
+  s3Endpoint: s3.us-south.objectstorage.service.networklayer.com
+  s3Port: 443
   interval: 5
-  cosBucket: test-sf-ch-research-dev
-  cosLocation: us-south
-  cosAccessKey: "cos access key"
-  cosSecretKey: "cos secret key"
+  s3Bucket: sysflow-bucket
+  s3Location: us-south
+  s3AccessKey: "s3 access key"
+  s3SecretKey: "s3 secret key"
 
 outDir: /mnt/data/
 nameOverride: "sfexporter"
