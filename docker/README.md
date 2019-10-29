@@ -23,15 +23,8 @@ yum -y install kernel-devel-$(uname -r)
 Clone the repository and navigate to this directory.
 
 ```
-git clone git@github.ibm.com:sysflow/sf-deployments.git
+git clone git@github.com:sysflow-telemetry/sf-deployments.git
 cd sf-deployments/docker
-```
-
-### Add private registry certificate to docker client
-This step enables docker to pull the required images from the private registry in IRIS:
-```
-sudo mkdir -p /etc/docker/certs.d/floripa.sl.cloud9.ibm.com
-sudo cp ca.crt /etc/docker/certs.d/floripa.sl.cloud9.ibm.com/ca.crt
 ```
 
 ## Option 1: Local telemetry deployment: Sysflow collection probe only
@@ -62,7 +55,7 @@ sudo docker run --name sf-exporter \
     -e INTERVAL=15 \
     -e DIR=/mnt/data \
     --mount type=bind,source=/mnt/data,destination=/mnt/data \
-    floripa.sl.cloud9.ibm.com/sf-exporter:latest
+    sysflowtelemetry/sf-exporter:latest
 ```
 
 ## Option 2: Full telemetry stack deployment: Sysflow collector probe and S3 exporter
@@ -75,8 +68,8 @@ sudo docker swarm init --advertise-addr <local interface (e.g., 10.x)>
 ```
 Create the docker secrets used to connect to the object store:
 ```
-printf "<cos access key>" | sudo docker secret create cos_access_key -
-printf "<cos secret key>" | sudo docker secret create cos_secret_key -
+printf "<s3 access key>" | sudo docker secret create s3_access_key -
+printf "<s3 secret key>" | sudo docker secret create s3_secret_key -
 ```
 ### Start telemetry stack
 ```
@@ -107,7 +100,7 @@ Run the `sysprint` script and point it to a trace file.
 
 ### Inspect traces exported to an object store:
 ```
-./sysprint -i cos -c <cos_endpoint> -a <cos_access_key> -s <cos_secret_key> <bucket_name>
+./sysprint -i s3 -c <s3_endpoint> -a <s3_access_key> -s <s3_secret_key> <bucket_name>
 ```
 
 > Tip: see all options of the `sysprint` utility with `sysprint -h`

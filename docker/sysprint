@@ -19,4 +19,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-sudo docker run --rm --name sftests -it -v "/mnt/data:/mnt/data" -v "$(pwd)/tests:/usr/local/sysflow/tests" floripa.sl.cloud9.ibm.com/sf-exporter:latest sysprint "$@"
+sudo docker run --rm --name sysprint -it -v "/mnt/data:/mnt/data" sysflowtelemetry/sf-exporter:latest sysprint "$@"

@@ -19,24 +19,24 @@
 version: "3.5"
 services:
   sf-exporter:
-    image: floripa.sl.cloud9.ibm.com/sf-exporter:latest
+    image: sysflowtelemetry/sf-exporter:latest
     deploy:
       replicas: 1
     secrets:
-      - cos_access_key
-      - cos_secret_key
+      - s3_access_key
+      - s3_secret_key
     volumes:
       - /mnt/data:/mnt/data
     environment:
-      COS_ENDPOINT: 9.59.150.60
-      COS_LOCATION: ykt
-      COS_BUCKET: challenges # can be set to any value
+      S3_ENDPOINT: 9.59.150.60
+      S3_LOCATION: ykt
+      S3_BUCKET: challenges # can be set to any value
       NODE_IP: ptl # can be set to any value
       SECURE: "false"
       INTERVAL: 150
   # currently, swarm mode doesn't support privileged flag; it will be supported soon. 
   #sf-collector:
-  #  image: floripa.sl.cloud9.ibm.com/sf-collector:latest
+  #  image: sysflowtelemetry/sf-collector:latest
   #  privileged: true
   #  deploy:
   #    replicas: 1
@@ -47,7 +47,7 @@ services:
   #    FILTER:  
   #    INTERVAL: 30
 secrets:
-  cos_access_key:
+  s3_access_key:
     external: true
-  cos_secret_key:
+  s3_secret_key:
     external: true
