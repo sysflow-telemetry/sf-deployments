@@ -122,15 +122,3 @@ To delete the exporter chart run:
 ```
 ./deleteExporterChart
 ```
-
-## Useful IBM Cloud commands:
-
-### list all images in the registry
-ibmcloud cr image-list
-
-### get more information on a pod (why it failed for example)
-kubectl describe pod <pod name>
-
-### init helm chart with tls keys
-
-helm init --debug  --tiller-tls --tiller-tls-cert ./tiller.cert.pem --tiller-tls-key ./tiller.key.pem --tiller-tls-verify --tls-ca-cert ca.cert.pem --service-account=tiller
