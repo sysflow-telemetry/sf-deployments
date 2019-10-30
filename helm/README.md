@@ -1,14 +1,10 @@
 # Helm Charts
 
-The sf-deployments repository  contains a set of helm charts (under the helm directory) used to deploy the sysflow collector, and exporter 
-into a K8s environment.  It also contains a test harness for testing the telemetry infrastructure against 
-various workloads.  Think of helm as a package manager for deploying kubernetes pods and services into a cloud.  The charts tell Helm 
-how to conduct these deployments and allow the user to change a wide array of configurations.
+The sf-deployments repository  contains a set of helm charts (under the helm directory) used to deploy the sysflow collector, and exporter into a K8s environment. It also contains a test harness for testing the telemetry infrastructure against 
+various workloads. Think of helm as a package manager for deploying kubernetes pods and services into a cloud.  The charts tell Helm how to conduct these deployments and allow the user to change a wide array of configurations.
 
-The SysFlow telemetry infrastructure is designed such that it should be deployable in any cloud environment.  Currently, due to 
-resource limitations we have only been able to test infrastructure on IBM Cloud.  As time permits, we will test deployment on other 
-public/private cloud offerings. There are likely some minor differences in how the authentication works on each cloud which could
-require changes to these charts.
+The SysFlow telemetry infrastructure is designed such that it should be deployable in any cloud environment. It has been tested on IBM Cloud, and as time permits, we will test it on other 
+public/private cloud offerings. There are likely some minor differences in how the authentication works on each cloud which could require changes to these charts.
 
 
 ## Prerequisites
