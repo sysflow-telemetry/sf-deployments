@@ -27,13 +27,9 @@ cd sf-deployments/helm
 
 ## Helm - sf-exporter-chart 
 
-The sf-exporter-chart resides in the `sf-exporter-chart` folder.  The exporter chart is a kubernetes daemonset, which deploys the sf-collector, and the
-sf-exporter to each node in the cluster.  The sf-collector monitors the node, and writes sysflow to a shared mount `/mnt/data`.  The sf-exporter
-reads from the `/mnt/data` and pushes completed files to an S3 compliant object store for analysis before deleting them.  
+The sf-exporter-chart resides in the `sf-exporter-chart` folder.  The exporter chart is a kubernetes daemonset, which deploys the sf-collector, and the sf-exporter to each node in the cluster.  The sf-collector monitors the node, and writes sysflow to a shared mount `/mnt/data`.  The sf-exporter reads from the `/mnt/data` and pushes completed files to an S3 compliant object store for analysis before deleting them.  
 
-An install script called `./installExporterChart` is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets.  
- To use it, first go into the sf-exporter-chart directory and copy `values.yaml` to `values.yaml.local` and begin tailoring this yaml to your environment.  
-Note that some of values set in here are passable through the installation script for safety reasons.
+An install script called `./installExporterChart` is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets. To use it, first go into the sf-exporter-chart directory and copy `values.yaml` to `values.yaml.local` and begin tailoring this yaml to your environment. Note that some of values set in here are passable through the installation script for safety reasons.
 
 ```
 # Default values for sysporter-chart.
