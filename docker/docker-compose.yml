@@ -32,7 +32,7 @@ services:
       S3_LOCATION: local
       S3_BUCKET: sysflow
       SECURE: "false"
-      INTERVAL: 15
+      INTERVAL: 120
       NODE_IP: localhost
     depends_on:
       - sf-collector
@@ -51,7 +51,7 @@ services:
     environment:
       EXPORTER_ID: local
       FILTER: "container.name!=sf-collector and container.name!=sf-exporter" 
-      INTERVAL: 5 
+      INTERVAL: 60 
       OUTPUT: /mnt/data/ # trace files directory prefix
 secrets:
   s3_access_key:
