@@ -86,34 +86,36 @@ docker-compose -f docker-compose.yml down
 ```
 
 ## Sysflow trace inspection
-Run the `sysprint` script and point it to a trace file.
-
+Run `sysprint` and point it to a trace file. In the examples below, `sysprint` is an alias for:
+```
+docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint
+```
 ### Tabular output
 ```
-./sysprint /mnt/data/<trace name>
+sysprint /mnt/data/<trace name>
 ```
 
 ### JSON output
 ```
-./sysprint -o json /mnt/data/<trace name>
+sysprint -o json /mnt/data/<trace name>
 ```
 
 ### CSV output
 ```
-./sysprint -o csv /mnt/data/<trace name>
+sysprint -o csv /mnt/data/<trace name>
 ```
 
 ### Inspect traces exported to an object store:
 ```
-./sysprint -i s3 -c <s3_endpoint> -a <s3_access_key> -s <s3_secret_key> <bucket_name>
+sysprint -i s3 -c <s3_endpoint> -a <s3_access_key> -s <s3_secret_key> <bucket_name>
 ```
 
-> Tip: see all options of the `sysprint` utility with `sysprint -h`
+> Tip: see all options of the `sysprint` utility with `-h` option.
 
 ## Inspect example traces
 Sample trace files are provided in `tests`. Copy them into `/mnt/data` to inspect inside sysprint's environment.
 ```
-./sysprint /mnt/data/tests/client-server/tcp-client-server.sf
+sysprint /mnt/data/tests/client-server/tcp-client-server.sf
 ```
 
 > Tip: other samples can be found in the tests directory
