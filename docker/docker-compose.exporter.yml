@@ -36,23 +36,6 @@ services:
       NODE_IP: localhost
     depends_on:
       - sf-collector
-  sf-collector:
-    container_name: sf-collector
-    image: sf-collector:latest
-    privileged: true
-    volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock 
-      - /dev:/host/dev 
-      - /proc:/host/proc:ro 
-      - /boot:/host/boot:ro 
-      - /lib/modules:/host/lib/modules:ro 
-      - /usr:/host/usr:ro
-      - /mnt/data:/mnt/data
-    environment:
-      EXPORTER_ID: local
-      FILTER: "container.name!=sf-collector and container.name!=sf-exporter" 
-      INTERVAL: 5 
-      OUTPUT: /mnt/data/ # trace files directory prefix
 secrets:
   s3_access_key:
     file: ./secrets/access_key
