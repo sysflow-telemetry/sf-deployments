@@ -1,7 +1,7 @@
-# Sysflow Docker Telemetry Stack
+# Docker
 
 ## Introduction
-This repository contains utility scripts to deploy a local Sysflow telemetry stack.
+This repository contains utility scripts to deploy a docker telemetry stack.
 
 ### Deployment
 A _local collection_ (Option 1) and a _full stack_ (Option 2) deployment models are described below. The local deployment stores collected traces on the local filesystem and the full stack deployment exports the collected traces to a S3-compatible object storage server. 
@@ -31,16 +31,16 @@ cd sf-deployments/docker
 
 This deployment will install the Sysflow collection probe only, i.e., without an exporter to a data store (e.g., COS).  See below for the deploytment of the full telemetry stack.
 
-## Start telemetry probe 
+## Start collection probe 
 Start the telemetry probe, which will be ran in a container.
 
 > Tip: add container.type!=host to FILTER string located inside this script to filter out host (non-containerized) events.
 
 ```
-./start_probe 
+./start_probe
 ```
 
-### Stop telemetry probe
+### Stop collection probe
 ```
 ./stop_probe
 ```
@@ -54,7 +54,7 @@ sudo docker run --name sf-exporter \
     -e NODE_IP=<EXPORTER HOST IP> \
     -e INTERVAL=15 \
     -e DIR=/mnt/data \
-    --mount type=bind,source=/mnt/data,destination=/mnt/data \
+    -v /mnt/data:/mnt/data \
     sysflowtelemetry/sf-exporter:latest
 ```
 
@@ -112,13 +112,3 @@ Sample trace files are mounted into `/usr/local/sysflow/tests` inside sysprint's
 ```
 
 > Tip: other samples can be found in the tests directory
-
-## Interactive test environment
-
-### Start and enter testing environment
-Execute the script below from the root directory of this repository.
-```
-./test
-```
-
-
