@@ -32,7 +32,7 @@ services:
       S3_LOCATION: local
       S3_BUCKET: sysflow
       SECURE: "false"
-      INTERVAL: 15
+      INTERVAL: 120
       NODE_IP: localhost
     depends_on:
       - sf-collector
