@@ -33,5 +33,5 @@ services:
     environment:
       EXPORTER_ID: local
       FILTER: "container.name!=sf-collector and container.name!=sf-exporter" 
-      INTERVAL: 5 
+      INTERVAL: 60 
       OUTPUT: /mnt/data/ # trace files directory prefix
