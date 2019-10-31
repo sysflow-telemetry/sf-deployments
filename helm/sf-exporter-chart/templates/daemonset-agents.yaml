@@ -79,6 +79,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.nodeName
+        - name: EXPORTER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         - name: NODE_IP
           valueFrom:
             fieldRef:
@@ -157,6 +161,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
+        - name: EXPORTER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         - name: POD_UUID
           valueFrom:
             fieldRef:
