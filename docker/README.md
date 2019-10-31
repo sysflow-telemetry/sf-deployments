@@ -37,18 +37,18 @@ Start the telemetry probe, which will be ran in a container.
 > Tip: add container.type!=host to FILTER string located inside this script to filter out host (non-containerized) events.
 
 ```
-./start_probe
+docker-compose -f docker-compose.collector.yml up
 ```
 
 ### Stop collection probe
 ```
-./stop_probe
+docker-compose -f docker-compose.collector.yml down
 ```
 
 ### RSyslog exporter (optional)
 If exporting to rsyslog (e.g., QRadar), specify the IP and port of the remote syslog server:
 ```
-sudo docker run --name sf-exporter \
+docker run --name sf-exporter \
     -e SYSLOG_HOST=<RSYSLOG IP> \
     -e SYSLOG_PORT=<RSYSLOG PORT> \
     -e NODE_IP=<EXPORTER HOST IP> \
@@ -62,22 +62,27 @@ sudo docker run --name sf-exporter \
 > Note: skip this if deploying locally.
 
 ### Create docker secrets
-If the node (host) isn't part of a docker swarm, initialize a local one (required for docker secrets):
-```
-sudo docker swarm init --advertise-addr <local interface (e.g., 10.x)>
-```
 Create the docker secrets used to connect to the object store:
 ```
-printf "<s3 access key>" | sudo docker secret create s3_access_key -
-printf "<s3 secret key>" | sudo docker secret create s3_secret_key -
+echo "<s3 access key>" > ./secrets/access_key
+echo "<s3 secret key>" > ./secrets/secret_key
 ```
-### Start telemetry stack
+### Start telemetry stack (with local object store)
 ```
-./start <exporter_name> 
+docker-compose -f docker-compose.minio.yml -f docker-compose.yml up
 ```
-### Stop telemetry stack
+### Stop telemetry stack (with local object store)
 ```
-./stop
+docker-compose -f docker-compose.minio.yml -f docker-compose.yml down
+```
+### Start telemetry stack (external object store)
+If exporting to a remote object store, modify the exporter settings in `docker-compose.yml` and run:
+```
+docker-compose -f docker-compose.yml up
+```
+### Stop telemetry stack (external object store)
+```
+docker-compose -f docker-compose.yml down
 ```
 
 ## Sysflow trace inspection
