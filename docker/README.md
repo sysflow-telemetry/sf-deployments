@@ -76,7 +76,7 @@ docker-compose -f docker-compose.minio.yml -f docker-compose.yml up
 docker-compose -f docker-compose.minio.yml -f docker-compose.yml down
 ```
 ### Start telemetry stack (external object store)
-If exporting to a remote object store, modify the exporter settings in `docker-compose.yml` and run:
+If exporting to a remote object store, modify the exporter settings in `docker-compose.yml`, then run:
 ```
 docker-compose -f docker-compose.yml up
 ```
