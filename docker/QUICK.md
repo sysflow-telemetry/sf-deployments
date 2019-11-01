@@ -21,7 +21,7 @@ where INTERVAL denotes the time in seconds before a new trace file is generated,
 Instructions for `docker compose` and `helm` deployments are available in [here](https://sysflow.readthedocs.io/en/latest/deploy.html).
 
 ### Inspecting collected traces
-A [command line utilitiy](https://sysflow.readthedocs.io/en/latest/api-utils.html) is provided for inspecting collected traces or concert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
+A [command line utilitiy](https://sysflow.readthedocs.io/en/latest/api-utils.html) is provided for inspecting collected traces or convert traces from SysFlow's compact binary format into human-readable JSON or CSV formats. 
 
 ```
 docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace> 
