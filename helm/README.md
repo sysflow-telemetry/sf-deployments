@@ -10,7 +10,7 @@ public/private cloud offerings. There are likely some minor differences in how t
 ## Prerequisites
 
 1. Install Helm: https://helm.sh/ 
-2. Setup TLS for Helm: https://github.com/helm/helm/blob/master/docs/tiller_ssl.md
+2. Setup TLS for Helm: https://helm.sh/docs/tiller_ssl/
 3. Ensure you have access to a docker registry with docker images: sf-exporter, sf-collector, and sf-analytics.
 4. S3 compliant object store - Currently tested with IBM's cloud object store, and minio object store (https://docs.min.io/). 
     * Setup IBM Cloud Object store: https://cloud.ibm.com/docs/services/cloud-object-storage/iam?topic=cloud-object-storage-getting-started

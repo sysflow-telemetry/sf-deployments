@@ -58,7 +58,7 @@ if [[ "$tlsStatus" != "Error: transport is closing" ]]; then
         sleep 10
         tls=''
     else
-        echo "Setup helm TLS. Follow https://github.com/helm/helm/blob/master/docs/tiller_ssl.md"
+        echo "Setup helm TLS. Follow https://helm.sh/docs/tiller_ssl/"
         exit 1
     fi
 fi
