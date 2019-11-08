@@ -32,47 +32,43 @@ The sf-exporter-chart resides in the `sf-exporter-chart` folder.  The exporter c
 An install script called `./installExporterChart` is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets. To use it, first go into the sf-exporter-chart directory and copy `values.yaml` to `values.yaml.local` and begin tailoring this yaml to your environment. Note that some of values set in here are passable through the installation script for safety reasons.
 
 ```
-# Default values for sysporter-chart.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
+# sysflow collection probe parameters
 sfcollector:
-  repository: sysflowtelemetry/sf-collector 
+  # image repository
+  repository: sysflowtelemetry/sf-collector
+  # image tag
   tag: latest
-  imagePullPolicy: Always
+  # timeout in seconds to start roll a new trace files
   interval: 300
+  # output directory, where traces are written to inside container
   outDir: /mnt/data/
-  filter: "-f \"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector and container.name!=skydive-agent\""
+  # collection filter
+  filter: "\"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector\""
+# sysflow exporter parameters
 sfexporter:
+  # image repository
   repository: sysflowtelemetry/sf-exporter
+  # image tag
   tag: latest
-  imagePullPolicy: Always
-  s3Endpoint: s3.us-south.objectstorage.service.networklayer.com
-  s3Port: 443
-  interval: 5
+  # export inverval
+  interval: 30
+  # directory where traces are read from inside container
+  outDir: /mnt/data/
+  # object store address (overhidden by install script)
+  s3Endpoint: "\<ip\_address\>"
+  # object store port
+  s3Port: 9000
+  # object store bucket where to push traces
   s3Bucket: sysflow-bucket
+  # object store location (overhidden by install script)
   s3Location: us-south
-  s3AccessKey: <s3 access id>
-  s3SecretKey: <s3 secret key>
+  # object store access key (overhidden by install script)
+  s3AccessKey: "\<s3\_access\_key\>"
+  # object store secret key (overhidden by install script)
+  s3SecretKey: "\<s3\_secret\_key\>"
+  # object store connection, 'true' if TLS-enabled, 'false' otherwise
+  s3Secure: "false"
 
-outDir: /mnt/data/
-nameOverride: "sfexporter"
-fullnameOverride: ""
-tmpfsSize: 500Mi
-
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
 ```
 Most of the defaults should work in any environment.  Ensure that the repository locations for both the sfcollector and sfexporter are pointing to the correct location.  The collector is
 currently set to rotating files in 5 min intervals (or 300 seconds).   The `/mnt/data/` is mapped to a tmpfs filesystem, and you can specify its size using the `tmpfsSize`.  

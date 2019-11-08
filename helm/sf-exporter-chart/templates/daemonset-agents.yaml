@@ -17,7 +17,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Capabilities.APIVersions.Has "apps/v1" }}
+apiVersion: apps/v1
+{{- else if .Capabilities.APIVersions.Has "extensions/v1beta1" }}
 apiVersion: extensions/v1beta1
+{{- else }}
+apiVersion: apps/v1
+{{- end }}
 kind: DaemonSet
 metadata:
   name: {{ template "sf-exporter-chart.fullname" . }}-agent
@@ -38,34 +44,32 @@ spec:
         release: "{{ .Release.Name }}"
         tier: agent
     spec:
-      {{- with .Values.resources }}
+      {{- if .Values.resources }}
       resources:
-      {{- toYaml . | nindent 12 }}
+      {{- toYaml .Values.resources | nindent 8 }}
       {{- end }}
-      {{- with .Values.nodeSelector }}
+      {{- if .Values.nodeSelector }}
       nodeSelector:
-      {{- toYaml . | nindent 8 }}
+      {{- toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- if .Values.affinity }}
       affinity:
-      {{- toYaml . | nindent 8 }}
+      {{- toYaml .Values.affinity | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- if .Values.tolerations }}
       tolerations:
-      {{- toYaml . | nindent 8 }}
+      {{- toYaml .Values.tolerations | nindent 8 }}
       {{- end }}
-    {{- if .Values.registry.secretName }}
+      {{- if .Values.registry.secretName }}
       {{- if ne .Values.registry.secretName ""}}
       imagePullSecrets:
       - name: {{ .Values.registry.secretName }}
       {{- end }}
-    {{- end }}
+      {{- end }}
       containers:
       - name: sfcollector
         image: {{ .Values.sfcollector.repository }}:{{ .Values.sfcollector.tag }}
         imagePullPolicy: {{ .Values.sfcollector.imagePullPolicy | default "" | quote }}
-        #command: ["/bin/sh"]
-        #args: ["-c", "/docker-entrypoint.sh; /usr/local/sysflow/bin/sysporter -G {{ .Values.sfcollector.interval }} -w {{ .Values.sfcollector.outFile }} {{ .Values.sfcollector.cFlag }} "]
         env:
         - name: FILTER
           value: {{ .Values.sfcollector.filter }}
@@ -108,12 +112,15 @@ spec:
             fieldRef:
               fieldPath: spec.serviceAccountName
         volumeMounts:
-        - mountPath: {{ .Values.outDir }}
+        - mountPath: {{ .Values.sfcollector.outDir }}
           name: data
+          readOnly: false
         - mountPath: /host/var/run/docker.sock
           name: dockersock
+          readOnly: false 
         - mountPath: /host/dev
           name: dev
+          readOnly: false
         - mountPath: /host/proc
           name: proc
           readOnly: true
@@ -132,14 +139,13 @@ spec:
         image: {{ .Values.sfexporter.repository }}:{{ .Values.sfexporter.tag }}
         imagePullPolicy: {{ .Values.sfexporter.imagePullPolicy | default "" | quote }}
         volumeMounts:
-        - mountPath: {{ .Values.outDir }}
+        - mountPath: {{ .Values.sfexporter.outDir }}
           name: data
+          readOnly: false
         - mountPath: "/run/secrets/k8s"
           name: secrets
           subpath: k8s
-        #command: ["python"]
-        #args: ["/usr/local/monitor/monitor.py",  "--host={{ .Values.sfexporter.s3URL }}", "--port={{ .Values.sfexporter.port }}",  "--scaninterval={{ .Values.sfexporter.scanInterval }}", "--dir={{ .Values.outDir }}", "--bucket={{ .Values.sfexporter.s3Bucket }}", "--location={{ .Values.sfexporter.location }}", "--accesskey={{ .Values.sfexporter.accessKey }}", "--secretkey={{ .Values.sfexporter.secretKey }}"]
-        #args: ["/usr/local/exporter/exporter.py",  "--host={{ .Values.sfexporter.s3Endpoint }}", "--port={{ .Values.sfexporter.s3Port }}",  "--scaninterval={{ .Values.sfexporter.scanInterval }}", "--dir={{ .Values.outDir }}", "--bucket={{ .Values.sfexporter.s3Bucket }}", "--location={{ .Values.sfexporter.s3Location }}"]
+          readOnly: true
         env:
         - name: S3_ENDPOINT
           value: {{ .Values.sfexporter.s3Endpoint }}
@@ -151,8 +157,10 @@ spec:
           value: {{ .Values.sfexporter.s3Bucket }}
         - name: S3_LOCATION
           value: {{ .Values.sfexporter.s3Location }}
+        - name: SECURE
+          value: "{{ .Values.sfexporter.s3Secure }}"
         - name: DIR
-          value: {{ .Values.outDir }}
+          value: {{ .Values.sfexporter.outDir }}
         - name: NODE_NAME
           valueFrom:
             fieldRef:
@@ -185,8 +193,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.serviceAccountName
-      #nodeSelector:
-      #  kubernetes.io/hostname: 10.187.39.243
       volumes:
       - name: secrets
         secret:
@@ -200,9 +206,6 @@ spec:
         emptyDir:
           medium: Memory
           sizeLimit: {{ .Values.tmpfsSize }}
-      #- name: data
-      #  hostPath:
-      #    path: /mnt/data
       - name: dockersock
         hostPath:
           path: /var/run/docker.sock

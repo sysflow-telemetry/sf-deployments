@@ -17,60 +17,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Default values for sysporter-chart.
+# Template values for sf-exporter-chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 registry:
   secretName: ""
 
+# sysflow collection probe parameters
 sfcollector:
+  # image repository
   repository: sysflowtelemetry/sf-collector
+  # image tag
   tag: latest
-  imagePullPolicy: Always
+  # timeout in seconds to start roll a new trace files
   interval: 300
+  # output directory, where traces are written to inside container
   outDir: /mnt/data/
-  filter: "container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector"
-#-f \"container.type!=host and container.type=docker and container.name!=sf-collector and not (container.name contains sf-exporter)\"
+  # collection filter
+  filter: "\"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector\""
+# sysflow exporter parameters
 sfexporter:
+  # image repository
   repository: sysflowtelemetry/sf-exporter
+  # image tag
   tag: latest
-  imagePullPolicy: Always
-  s3Endpoint: s3.us-south.objectstorage.service.networklayer.com
-  s3Port: 443
-  interval: 5
+  # export inverval
+  interval: 30
+  # directory where traces are read from inside container
+  outDir: /mnt/data/
+  # object store address (overhidden by install script)
+  s3Endpoint: "<ip address>"
+  # object store port
+  s3Port: 9000
+  # object store bucket where to push traces
   s3Bucket: sysflow-bucket
+  # object store location (overhidden by install script)
   s3Location: us-south
-  s3AccessKey: "s3 access key"
-  s3SecretKey: "s3 secret key"
+  # object store access key (overhidden by install script)
+  s3AccessKey: "<s3_access_key>"
+  # object store secret key (overhidden by install script)
+  s3SecretKey: "<s3_secret_key>"
+  # object store connection, 'true' if TLS-enabled, 'false' otherwise
+  s3Secure: "false"
 
-outDir: /mnt/data/
 nameOverride: "sfexporter"
 fullnameOverride: ""
-tmpfsSize: 500Mi
+tmpfsSize: 500Mi # size of tmpfs shared volume between collector and exporter (where traces are written)
 
-resources: 
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
+## @param resources - object - optional
+## Resource requests and limits for the kube-state-metrics container.
+#
+resources: {}
+#  requests:
+#    cpu: 600m
+#    memory: 512Mi
+#  limits:
+#    cpu: 2000m
+#    memory: 1536Mi
+   
+## @param nodeSelector - object - optional
+## Allow the ClusterChecks Deployment to schedule on selected nodes
+## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+#
+# nodeSelector: {}
 
+## @param tolerations - array - required
+## Tolerations for pod assignment
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+#
+# tolerations: []
 
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+## @param affinity - object - optional
+## Allow the ClusterChecks Deployment to schedule using affinity rules.
+## By default, ClusterChecks Deployment Pods are forced to run on different Nodes.
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+#
+# affinity: {}

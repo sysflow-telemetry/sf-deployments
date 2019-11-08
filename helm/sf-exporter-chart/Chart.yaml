@@ -18,13 +18,12 @@
 # limitations under the License.
 apiVersion: v1
 appVersion: "1.0"
-description: A Helm chart to deploy SysFlow Exporters across nodes in a cluster. 
+description: A Helm chart to deploy SysFlow Telemetry pods across nodes in a cluster. 
 name: sf-exporter-chart
-version: 0.1.0
+version: 0.1-rc1
 keywords:
   - SysFlow
-  - Research
-  - Analytics
+  - Telemetry
   - System Events
 maintainers:
   - name:  SysFlow Team
