@@ -20,7 +20,7 @@ version: "3.5"
 services:
   sf-exporter:
     container_name: sf-exporter
-    image: sf-exporter:latest
+    image: sysflowtelemetry/sf-exporter:latest
     secrets:
       - s3_access_key
       - s3_secret_key
@@ -38,7 +38,7 @@ services:
       - sf-collector
   sf-collector:
     container_name: sf-collector
-    image: sf-collector:latest
+    image: sysflowtelemetry/sf-collector:latest
     privileged: true
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock 

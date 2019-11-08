@@ -20,7 +20,7 @@ version: "3.5"
 services:
   sf-collector:
     container_name: sf-collector
-    image: sf-collector:latest
+    image: sysflowtelemetry/sf-collector:latest
     privileged: true
     volumes:
       - /var/run/docker.sock:/host/var/run/docker.sock 
@@ -32,6 +32,6 @@ services:
       - /mnt/data:/mnt/data
     environment:
       EXPORTER_ID: local
-      FILTER: "container.name!=sf-collector and container.name!=sf-exporter" 
+      FILTER: "\"container.name!=sf-collector and container.name!=sf-exporter\"" 
       INTERVAL: 60 
       OUTPUT: /mnt/data/ # trace files directory prefix
