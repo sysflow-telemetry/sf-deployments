@@ -1,0 +1,31 @@
+apiVersion: charts.helm.k8s.io/v1alpha1
+kind: SfExporterChart
+metadata:
+  name: example-sfexporterchart
+spec:
+  # Default values copied from <project_dir>/helm-charts/sf-exporter-chart/values.yaml
+  
+  fullnameOverride: ""
+  nameOverride: sfexporter
+  registry:
+    secretName: ""
+  resources: {}
+  sfcollector:
+    filter: '"container.type!=host and container.type=cri-o and container.name!=sfexporter
+      and container.name!=sfcollector"'
+    interval: 300
+    outDir: /mnt/data/
+    repository: sysflowtelemetry/sf-collector
+    tag: edge
+  sfexporter:
+    interval: 30
+    outDir: /mnt/data/
+    repository: sysflowtelemetry/sf-exporter
+    s3Bucket: sysflow-bucket
+    s3Endpoint: s3.us-south.cloud-object-storage.appdomain.cloud
+    s3Location: us-south
+    s3Port: 9000
+    s3Secure: "false"
+    tag: edge
+  tmpfsSize: 500Mi
+  

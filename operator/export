@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo docker push us.icr.io/seccloud/sf-operator:v0.1
