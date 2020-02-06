@@ -10,6 +10,7 @@ sfcollector:
   outDir: /mnt/data/
   repository: sysflowtelemetry/sf-collector
   tag: edge
+  imagePullPolicy: Always
 sfexporter:
   interval: 30
   outDir: /mnt/data/
@@ -22,4 +23,5 @@ sfexporter:
   s3SecretKey: <s3_secret_key>
   s3Secure: "false"
   tag: edge
+  imagePullPolicy: Always
 tmpfsSize: 500Mi

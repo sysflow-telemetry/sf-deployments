@@ -17,15 +17,18 @@ spec:
     outDir: /mnt/data/
     repository: sysflowtelemetry/sf-collector
     tag: edge
+    imagePullPolicy: Always
   sfexporter:
     interval: 30
     outDir: /mnt/data/
     repository: sysflowtelemetry/sf-exporter
     s3Bucket: sysflow-bucket
-    s3Endpoint: s3.us-south.cloud-object-storage.appdomain.cloud
+    s3Endpoint: s3.private.us-south.cloud-object-storage.appdomain.cloud
+    #s3Endpoint: s3.us-south.cloud-object-storage.appdomain.cloud
     s3Location: us-south
-    s3Port: 9000
-    s3Secure: "false"
+    s3Port: 443
+    s3Secure: "true"
     tag: edge
+    imagePullPolicy: Always
   tmpfsSize: 500Mi
   
