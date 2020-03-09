@@ -1,2 +1,2 @@
 #!/bin/bash
-kubectl apply -f deploy/crds/charts.helm.k8s.io_v1alpha1_sfexporterchart_cr.yaml
+oc apply -f deploy/crds/charts.helm.k8s.io_v1alpha1_sfexporterchart_cr.yaml
