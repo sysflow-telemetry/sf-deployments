@@ -11,8 +11,8 @@ spec:
     secretName: ""
   resources: {}
   sfcollector:
-    filter: '"container.type!=host and container.type=cri-o and container.name!=sfexporter
-      and container.name!=sfcollector"'
+    filter: "container.type!=host and container.type=cri-o and container.name!=sfexporter
+      and container.name!=sfcollector"
     interval: 300
     outDir: /mnt/data/
     repository: sysflowtelemetry/sf-collector

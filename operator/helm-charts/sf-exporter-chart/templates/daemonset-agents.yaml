@@ -73,7 +73,7 @@ spec:
         imagePullPolicy: {{ .Values.sfcollector.imagePullPolicy | default "" | quote }}
         env:
         - name: FILTER
-          value: {{ .Values.sfcollector.filter }}
+          value: "{{ .Values.sfcollector.filter }}"
         - name: INTERVAL
           value: "{{ .Values.sfcollector.interval }}"
         - name: OUTPUT
@@ -81,7 +81,7 @@ spec:
         - name: LOCATION
           value: {{ .Values.sfexporter.s3Location }}
         - name: CRI_PATH
-          value: "/host/var/run/crio/crio.sock"
+          value: "/var/run/crio/crio.sock"
         - name: CRI_TIMEOUT
           value: "5"
         - name: NODE_NAME
