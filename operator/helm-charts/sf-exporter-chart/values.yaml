@@ -1,0 +1,27 @@
+fullnameOverride: ""
+nameOverride: sfexporter
+registry:
+  secretName: ""
+resources: {}
+sfcollector:
+  filter: '"container.type!=host and container.type=docker and container.name!=sfexporter
+    and container.name!=sfcollector"'
+  interval: 300
+  outDir: /mnt/data/
+  repository: sysflowtelemetry/sf-collector
+  tag: edge
+  imagePullPolicy: Always
+sfexporter:
+  interval: 30
+  outDir: /mnt/data/
+  repository: sysflowtelemetry/sf-exporter
+  s3AccessKey: <s3_access_key>
+  s3Bucket: sysflow-bucket
+  s3Endpoint: <ip address>
+  s3Location: us-south
+  s3Port: 9000
+  s3SecretKey: <s3_secret_key>
+  s3Secure: "false"
+  tag: edge
+  imagePullPolicy: Always
+tmpfsSize: 500Mi

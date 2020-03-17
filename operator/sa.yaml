@@ -1,0 +1,21 @@
+apiVersion: v1
+imagePullSecrets:
+- name: default-icr-io
+- name: default-us-icr-io
+- name: default-uk-icr-io
+- name: default-de-icr-io
+- name: default-au-icr-io
+- name: default-jp-icr-io
+- name: default-dockercfg-47rxf
+kind: ServiceAccount
+metadata:
+  creationTimestamp: "2019-10-07T19:05:44Z"
+  name: default
+  namespace: default
+  resourceVersion: "1957"
+  selfLink: /api/v1/namespaces/default/serviceaccounts/default
+  uid: 76ed8c42-e935-11e9-ac14-86cca9941623
+secrets:
+- name: default-token-d4m49
+- name: default-dockercfg-47rxf
+- name: registry-certificates

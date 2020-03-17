@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sysflow-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: sysflow-operator
+  template:
+    metadata:
+      labels:
+        name: sysflow-operator
+    spec:
+      serviceAccountName: sysflow-operator
+      containers:
+        - name: sysflow-operator
+          # Replace this with the built image name
+          image: us.icr.io/seccloud/sf-operator:v0.1
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "sysflow-operator"
