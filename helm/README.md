@@ -10,9 +10,8 @@ public/private cloud offerings. There are likely some minor differences in how t
 ## Prerequisites
 
 1. Install Helm: https://helm.sh/ 
-2. Setup TLS for Helm: https://helm.sh/docs/tiller_ssl/
-3. Ensure you have access to a docker registry with docker images: sf-exporter, sf-collector, and sf-analytics.
-4. S3 compliant object store - Currently tested with IBM's cloud object store, and minio object store (https://docs.min.io/). 
+2. Setup TLS for Helm: https://v2.helm.sh/docs/tiller_ssl/
+3. S3 compliant object store - Currently tested with IBM's cloud object store, and minio object store (https://docs.min.io/). 
     * Setup IBM Cloud Object store: https://cloud.ibm.com/docs/services/cloud-object-storage/iam?topic=cloud-object-storage-getting-started
 5. Create Cloud Object Store HMAC Access ID, and Secret Key.
     * For IBM Cloud Object store: https://cloud.ibm.com/docs/services/cloud-object-storage/iam?topic=cloud-object-storage-service-credentials 
@@ -21,7 +20,7 @@ public/private cloud offerings. There are likely some minor differences in how t
 
 First, clone the repo with the following command:
 ```
-git clone git@github.com:sysflow-telemetry/sf-deployments.git .
+git clone git clone https://github.com/sysflow-telemetry/sf-deployments.git .
 cd sf-deployments/helm
 ```
 
@@ -29,9 +28,12 @@ cd sf-deployments/helm
 
 The sf-exporter-chart resides in the `sf-exporter-chart` folder.  The exporter chart is a kubernetes daemonset, which deploys the sf-collector, and the sf-exporter to each node in the cluster.  The sf-collector monitors the node, and writes sysflow to a shared mount `/mnt/data`.  The sf-exporter reads from the `/mnt/data` and pushes completed files to an S3 compliant object store for analysis before deleting them.  
 
-An install script called `./installExporterChart` is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets. To use it, first go into the sf-exporter-chart directory and copy `values.yaml` to `values.yaml.local` and begin tailoring this yaml to your environment. Note that some of values set in here are passable through the installation script for safety reasons.
+An install script called `./installExporterChart` is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets. To use it, first go into the sf-exporter-chart directory and copy `values.yaml` to `values.yaml.local` and begin tailoring this yaml to your environment. Note that some of values set in here are passable through the installation script for safety reasons.  Note that the install and delete scripts assume that tls is NOT installed.  To support tls, simply add `--tls` to the helm commands at the bottom of each file.
 
 ```
+registry:
+  secretName: ""
+
 # sysflow collection probe parameters
 sfcollector:
   # image repository
@@ -43,7 +45,15 @@ sfcollector:
   # output directory, where traces are written to inside container
   outDir: /mnt/data/
   # collection filter
-  filter: "\"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector\""
+  filter: "\"container.type!=host and container.name!=sfexporter and container.name!=sfcollector\""
+  #Use this criPath if running docker runtime
+  #criPath: ""
+  #uUse this criPath if running containerd runtime
+  criPath: "/var/run/containerd/containerd.sock"
+  #uUse this criPath if running crio runtime
+  #criPath: "/var/run/crio/crio.sock"
+
+
 # sysflow exporter parameters
 sfexporter:
   # image repository
@@ -54,28 +64,35 @@ sfexporter:
   interval: 30
   # directory where traces are read from inside container
   outDir: /mnt/data/
-  # object store address (overhidden by install script)
-  s3Endpoint: "\<ip\_address\>"
+  # object store address (overridden by install script)
+  s3Endpoint: "<ip address>"
   # object store port
-  s3Port: 9000
+  s3Port: 443
   # object store bucket where to push traces
   s3Bucket: sysflow-bucket
-  # object store location (overhidden by install script)
+  # object store location (overridden by install script)
   s3Location: us-south
-  # object store access key (overhidden by install script)
-  s3AccessKey: "\<s3\_access\_key\>"
-  # object store secret key (overhidden by install script)
-  s3SecretKey: "\<s3\_secret\_key\>"
+  # object store access key (overridden by install script)
+  s3AccessKey: "<s3_access_key>"
+  # object store secret key (overridden by install script)
+  s3SecretKey: "<s3_secret_key>"
   # object store connection, 'true' if TLS-enabled, 'false' otherwise
   s3Secure: "false"
 
+nameOverride: "sfexporter"
+fullnameOverride: ""
+tmpfsSize: 500Mi # size of tmpfs shared volume between collector and exporter (where traces are written)
 ```
-Most of the defaults should work in any environment.  Ensure that the repository locations for both the sfcollector and sfexporter are pointing to the correct location.  The collector is
+Most of the defaults should work in any environment.  The collector is
 currently set to rotating files in 5 min intervals (or 300 seconds).   The `/mnt/data/` is mapped to a tmpfs filesystem, and you can specify its size using the `tmpfsSize`.  
 CGroup resource limits can be set on the collector and exporter to limit resource usage.  These can be adjusted depending on requirements and resources limitations.
 
-Ensure that the `s3Bucket` is set to the desired S3 bucket location.   The `s3Location`, `s3AccessKey` and `s3SecretKey` and `s3Endpoint` are each passed in through the installation script if you use it.
+For connecting to an S3 compliant data store, first take note of which port the S3 data store (`s3Port`) is configured.  IBM Cloud COS listens on port 443, but certain minio installations can listen on 
+port 9000.  Also, if TLS is enabled on the S3 datastore, ensure `s3Secure` is `true`.  Ensure that the `s3Bucket` is set to the desired S3 bucket location.   The `s3Location`, `s3AccessKey` and `s3SecretKey` and `s3Endpoint` are each passed in through the installation script if you use it.
 
+Kubernetes can use different container runtimes.  Older versions used the docker runtime; however, newer versions typically run either containerd or crio.  It's important to know which runtime you have if you want to get the full benefits of sysflow. You tell the collector which runtime 
+you are using based on the sock file you refer too in the `criPath` variable.  If you are using the `docker` runtime, leave `criPath` blank.  If you are using containerd, set `criPath` to "/var/run/containerd/containerd.sock" and if you are using crio, set `criPath` to "/var/run/crio/crio.sock".
+If SysFlow files are empty or the container name variable is set to `incomplete` in SysFlow traces, this typically means that the runtime socket is not connected properly.
 ```
 ./installExporterChart <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint>
    <s3_region> value is the region in the S3 compliant object store (e.g., us-south)

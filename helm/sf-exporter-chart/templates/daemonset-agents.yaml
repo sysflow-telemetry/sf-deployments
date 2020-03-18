@@ -111,10 +111,32 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: spec.serviceAccountName
+        {{- if .Values.sfcollector.criPath }}
+        {{- if ne .Values.sfcollector.criPath ""}}
+        - name: CRI_PATH
+          value: "{{ .Values.sfcollector.criPath }}"
+        - name: CRI_TIMEOUT
+          value: "5"
+        {{- end }}
+        {{- end }}
         volumeMounts:
         - mountPath: {{ .Values.sfcollector.outDir }}
           name: data
           readOnly: false
+        {{- if .Values.sfcollector.criPath }}
+        {{- if eq .Values.sfcollector.criPath "/var/run/containerd/containerd.sock"}}
+        - mountPath: /host/var/run/containerd/containerd.sock
+          name: containerd-vol
+          readOnly: false
+        {{- end }}
+        {{- end }}
+        {{- if .Values.sfcollector.criPath }}
+        {{- if eq .Values.sfcollector.criPath "/var/run/crio/crio.sock"}}
+        - mountPath: /host/var/run/crio/crio.sock
+          name: varrun-vol-crio
+          readOnly: false 
+        {{- end }}
+        {{- end }}
         - mountPath: /host/var/run/docker.sock
           name: dockersock
           readOnly: false 
@@ -206,9 +228,23 @@ spec:
         emptyDir:
           medium: Memory
           sizeLimit: {{ .Values.tmpfsSize }}
+      {{- if .Values.sfcollector.criPath }}
+      {{- if eq .Values.sfcollector.criPath "/var/run/containerd/containerd.sock"}}
+      - name: containerd-vol
+        hostPath:
+          path: /var/run/containerd/containerd.sock
+      {{- end }}
+      {{- end }}
       - name: dockersock
         hostPath:
           path: /var/run/docker.sock
+      {{- if .Values.sfcollector.criPath }}
+      {{- if eq .Values.sfcollector.criPath "/var/run/crio/crio.sock"}}
+      - name: varrun-vol-crio
+        hostPath:
+          path: /var/run/crio/crio.sock 
+      {{- end }}
+      {{- end }}
       - name: dev
         hostPath:
           path: /dev

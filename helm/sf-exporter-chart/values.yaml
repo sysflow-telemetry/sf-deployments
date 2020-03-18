@@ -35,7 +35,15 @@ sfcollector:
   # output directory, where traces are written to inside container
   outDir: /mnt/data/
   # collection filter
-  filter: "\"container.type!=host and container.type=docker and container.name!=sfexporter and container.name!=sfcollector\""
+  filter: "\"container.type!=host and container.name!=sfexporter and container.name!=sfcollector\""
+  #Use this criPath if running docker runtime
+  criPath: ""
+  #uUse this criPath if running containerd runtime
+  #criPath: "/var/run/containerd/containerd.sock"
+  #uUse this criPath if running crio runtime
+  #criPath: "/var/run/crio/crio.sock"
+  
+  
 # sysflow exporter parameters
 sfexporter:
   # image repository
@@ -46,17 +54,17 @@ sfexporter:
   interval: 30
   # directory where traces are read from inside container
   outDir: /mnt/data/
-  # object store address (overhidden by install script)
+  # object store address (overridden by install script)
   s3Endpoint: "<ip address>"
   # object store port
-  s3Port: 9000
+  s3Port: 443
   # object store bucket where to push traces
-  s3Bucket: sysflow-bucket
-  # object store location (overhidden by install script)
-  s3Location: us-south
-  # object store access key (overhidden by install script)
+  s3Bucket: "<sysflow bucket name>"
+  # object store location (overridden by install script)
+  s3Location:  "<s3 region>"
+  # object store access key (overridden by install script)
   s3AccessKey: "<s3_access_key>"
-  # object store secret key (overhidden by install script)
+  # object store secret key (overridden by install script)
   s3SecretKey: "<s3_secret_key>"
   # object store connection, 'true' if TLS-enabled, 'false' otherwise
   s3Secure: "false"
