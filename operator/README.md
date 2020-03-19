@@ -17,7 +17,7 @@
 	[the SysFlow Community Slack](https://join.slack.com/t/sysflow-telemetry/shared_invite/enQtODA5OTA3NjE0MTAzLTlkMGJlZDQzYTc3MzhjMzUwNDExNmYyNWY0NWIwODNjYmRhYWEwNGU0ZmFkNGQ2NzVmYjYxMWFjYTM1MzA5YWQ)
 
 -	**Where to file issues**:  
-	[the github issue tracker](https://github.com/sysflow-telemetry/sf-docs/issues) (include the `sf-exporter` tag)
+	[the github issue tracker](https://github.com/sysflow-telemetry/sf-docs/issues) (include the `sf-deployments` tag)
 
 -	**Source of this description**:  
 	[repo's readme](https://github.com/sysflow-telemetry/sf-deployments/edit/master/operator/README.md) ([history](https://github.com/sysflow-telemetry/sf-deployments/commits/master/operator))
