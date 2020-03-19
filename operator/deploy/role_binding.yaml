@@ -5,7 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: sysflow-operator
-  namespace: default
+  namespace: sysflow
 roleRef:
   kind: ClusterRole
   name: cluster-admin
