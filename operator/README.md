@@ -1,12 +1,12 @@
-[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/sysflowtelemetry/sf-operator)](https://hub.docker.com/r/sysflowtelemetry/sf-operator/builds)
-[![Docker Pulls](https://img.shields.io/docker/pulls/sysflowtelemetry/sf-operator)](https://hub.docker.com/r/sysflowtelemetry/sf-operator)
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/sysflow-telemetry/sf-operator)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/sysflowtelemetry/oc-operator)](https://hub.docker.com/r/sysflowtelemetry/oc-operator/builds)
+[![Docker Pulls](https://img.shields.io/docker/pulls/sysflowtelemetry/sf-operator)](https://hub.docker.com/r/sysflowtelemetry/oc-operator)
+![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/sysflow-telemetry/sf-deployments/operator)
 [![Documentation Status](https://readthedocs.org/projects/sysflow/badge/?version=latest)](https://sysflow.readthedocs.io/en/latest/?badge=latest)
-[![GitHub](https://img.shields.io/github/license/sysflow-telemetry/operator)](https://github.com/sysflow-telemetry/sf-deployments/operator/blob/master/LICENSE.md)
+[![GitHub](https://img.shields.io/github/license/sysflow-telemetry/operator)](https://github.com/sysflow-telemetry/sf-deployments/blob/master/operator/LICENSE.md)
 
 # Supported tags and respective `Dockerfile` links
 
--	[`0.1-rc3`](https://github.com/sysflow-telemetry/sf-deployments/operator/blob/0.1-rc3/Dockerfile), [`latest`](https://github.com/sysflow-telemetry/sf-exporter/blob/master/Dockerfile)
+-	[`0.1-rc3`](https://github.com/sysflow-telemetry/sf-deployments/blob/0.1-rc3/operator/build/Dockerfile), [`latest`](https://github.com/sysflow-telemetry/sf-deployments/blob/master/operator/build/Dockerfile)
 
 # Quick reference
 
@@ -20,7 +20,7 @@
 	[the github issue tracker](https://github.com/sysflow-telemetry/sf-docs/issues) (include the `sf-exporter` tag)
 
 -	**Source of this description**:  
-	[repo's readme](https://github.com/sysflow-telemetry/sf-deployments/operator/edit/master/README.md) ([history](https://github.com/sysflow-telemetry/sf-exporter/commits/master))
+	[repo's readme](https://github.com/sysflow-telemetry/sf-deployments/edit/master/operator/README.md) ([history](https://github.com/sysflow-telemetry/sf-deployments/commits/master/operator))
 
 # What is SysFlow?
 
@@ -46,24 +46,24 @@ In the near future we hope to have a golang or ansible-based operator and have e
 
 First, clone the repo with the following command:
 ```
-git clone https://github.com/sysflow-telemetry/sf-deployments.git .
+git clone https://github.com/sysflow-telemetry/sf-deployments.git sf-deployments
 cd sf-deployments/operator
 ```
 Here are the steps in getting an OC operator deployed in an OpenShift cluster:
 
 1. Login to your OpenShift cluster using the `oc` client tool. `oc login ...`
 2. Create the sysflow project: `oc project sysflow`
-3. Create a secret file for the S3 access id, and secret key.  Use the following file as a template: https://github.com/sysflow-telemetry/sf-deployments/blob/master/helm/sf-exporter-chart/templates/secrets.yaml and call the secret: `example-sfexporterchart-secrets`
-   Note: that access id and secret key values have to be base64 encoded in the file.
+3. Create a secret file for the S3 access id, and secret key.  Use the following file as a template: https://github.com/sysflow-telemetry/sf-deployments/blob/master/operator/secrets.yaml and call the secret: `sfexporterchart-secrets`. 
+   Note: that access id and secret key values have to be base64 encoded in the file. You can generate the b64 encoding by doing:  `echo -n <s3 access id> | base64` and copying it into the yaml file
 4. Install the secret into the sysflow project: `oc create -f secrets.yaml`
-5. Edit the `operator/deploy/crds/charts.helm.k8s.io_v1alpha1_sfexporterchart_cr.yaml` for your deploymnent:
+5. Edit the `operator/deploy/crds/charts.helm.k8s.io_v1alpha1_sfexporterchart_cr.yaml` for your deployment:
 
 
 ```
 apiVersion: charts.helm.k8s.io/v1alpha1
 kind: SfExporterChart
 metadata:
-  name: example-sfexporterchart
+  name: sfexporterchart
 spec:
   # Default values copied from <project_dir>/helm-charts/sf-exporter-chart/values.yaml
   
