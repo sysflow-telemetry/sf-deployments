@@ -6,6 +6,7 @@ various workloads. Think of helm as a package manager for deploying kubernetes p
 The SysFlow telemetry infrastructure is designed such that it should be deployable in any cloud environment. It has been tested on IBM Cloud, and as time permits, we will test it on other 
 public/private cloud offerings. There are likely some minor differences in how the authentication works on each cloud which could require changes to these charts.
 
+NOTE: This document has been tested with helm version 2.12 and 2.16.  Some helm commands may not work with other versions of helm.  We've tested the framework on k8s versions 1.14 and 1.15. 
 
 ## Prerequisites
 
