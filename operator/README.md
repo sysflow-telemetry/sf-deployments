@@ -1,8 +1,7 @@
 [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/sysflowtelemetry/oc-operator)](https://hub.docker.com/r/sysflowtelemetry/oc-operator/builds)
 [![Docker Pulls](https://img.shields.io/docker/pulls/sysflowtelemetry/oc-operator)](https://hub.docker.com/r/sysflowtelemetry/oc-operator)
-<!--![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/sysflow-telemetry/sf-deployments)-->
 [![Documentation Status](https://readthedocs.org/projects/sysflow/badge/?version=latest)](https://sysflow.readthedocs.io/en/latest/?badge=latest)
-[![GitHub](https://img.shields.io/github/license/sysflow-telemetry/operator)](https://github.com/sysflow-telemetry/sf-deployments/blob/master/operator/LICENSE.md)
+[![GitHub](https://img.shields.io/github/license/sysflow-telemetry/sf-deployments)](https://github.com/sysflow-telemetry/sf-deployments/blob/master/LICENSE.md)
 
 # Supported tags and respective `Dockerfile` links
 
