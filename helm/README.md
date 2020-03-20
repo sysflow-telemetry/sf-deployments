@@ -6,7 +6,7 @@ various workloads. Think of helm as a package manager for deploying kubernetes p
 The SysFlow telemetry infrastructure is designed such that it should be deployable in any cloud environment. It has been tested on IBM Cloud, and as time permits, we will test it on other 
 public/private cloud offerings. There are likely some minor differences in how the authentication works on each cloud which could require changes to these charts.
 
-NOTE: This document has been tested with helm version 2.12 and 2.16.  Some helm commands may not work with other versions of helm.  We've tested the framework on k8s versions 1.14 and 1.15. 
+NOTE: This document has been tested with helm version 2.12, 2.16, and 3.1.  Some helm commands may not work with other versions of helm.  We've tested the framework on k8s versions 1.14, 1.15, 1.16. 
 
 ## Prerequisites
 
@@ -94,8 +94,10 @@ port 9000.  Also, if TLS is enabled on the S3 datastore, ensure `s3Secure` is `t
 Kubernetes can use different container runtimes.  Older versions used the docker runtime; however, newer versions typically run either containerd or crio.  It's important to know which runtime you have if you want to get the full benefits of sysflow. You tell the collector which runtime 
 you are using based on the sock file you refer too in the `criPath` variable.  If you are using the `docker` runtime, leave `criPath` blank.  If you are using containerd, set `criPath` to "/var/run/containerd/containerd.sock" and if you are using crio, set `criPath` to "/var/run/crio/crio.sock".
 If SysFlow files are empty or the container name variable is set to `incomplete` in SysFlow traces, this typically means that the runtime socket is not connected properly.
+
+There are two versions of the install script.  One in `sf-deployments/helm/helm-scpts-v2` works with helm version 2, while the other in `sf-deployments/helm/helm-scpts-v3` works with version 3. Run the script from the `helm` directory. For example:
 ```
-./installExporterChart <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint>
+./helm-scpts-v2/installExporterChart <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint>
    <s3_region> value is the region in the S3 compliant object store (e.g., us-south)
    <s3_access_key> is the access key present in S3 compliant service credentials
    <s3_secret_key> is the secret key present in S3 compliant service credentials
@@ -126,5 +128,5 @@ kubectl logs -f -c sfexporter <podname>  -n sysflow
 To delete the exporter chart run:
 
 ```
-./deleteExporterChart
+./helm-scpts-v2/deleteExporterChart
 ```
