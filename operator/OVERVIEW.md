@@ -1,3 +1,5 @@
+# OpenShift Operator
+
 This document describes how to use the Red Hat OpenShift (OC) Operator for deploying both the SysFlow exporter and collector as pods on OpenShift platforms.  The exporter pushes SysFlow files at intervals to an S3 compliant data 
 store, like IBM cloud object store (COS) or minio.   The operator is helm based and has been tested with OpenShift 3.11 and 4.3.  In the near future we hope to have a golang or ansible-based operator and have everything available
 in the operator catalog.  For now, the operator is available on docker hub.
