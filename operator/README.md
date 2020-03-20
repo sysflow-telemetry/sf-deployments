@@ -6,7 +6,7 @@
 
 # Supported tags and respective `Dockerfile` links
 
--	[`0.1-rc3`](https://github.com/sysflow-telemetry/sf-deployments/blob/0.1-rc3/operator/build/Dockerfile), [`latest`](https://github.com/sysflow-telemetry/sf-deployments/blob/master/operator/build/Dockerfile)
+-	[`latest`](https://github.com/sysflow-telemetry/sf-deployments/blob/master/operator/build/Dockerfile)
 
 # Quick reference
 
