@@ -16,7 +16,7 @@ spec:
       containers:
         - name: sysflow-operator
           # Replace this with the built image name
-          image: us.icr.io/seccloud/sf-operator:v0.1
+          image: sysflowtelemetry/oc-operator:latest
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
