@@ -24,16 +24,19 @@ function download_yaml() {
 }
 
 function fix_yaml() {
-    sed -i "s/SYSLOG_HOST: .*/SYSLOG_HOST: $syslogIP/" $WORKDIR/docker-compose.syslog.yml
+    if [ $SYSLOG_PORT ]; then
+        sed -i "s/SYSLOG_PORT: .*/SYSLOG_PORT: $SYSLOG_PORT/" $WORKDIR/docker-compose.syslog.yml
+    fi
+    sed -i "s/SYSLOG_HOST: .*/SYSLOG_HOST: $SYSLOG_IP/" $WORKDIR/docker-compose.syslog.yml
     cp $WORKDIR/docker-compose.syslog.yml $(dirname $0)/docker-compose.syslog.yml
     rm -rf $WORKDIR
 }
 
 function help_msg {
-    echo "Usage: $(basename $0) [--syslog <remote syslog ip>] [up | down]"
+    echo "Usage: $(basename $0) [--syslog <remote syslog ip>] [--port 514] [up | down]"
     echo ""
-    echo "Example: $(basename $0) --syslog 1.2.3.4 up       ---> Bring Up Service"
-    echo "         $(basename $0) down                      ---> Tear Down Service"
+    echo "Example: $(basename $0) --syslog 1.2.3.4 up --port 514    ---> Bring Up Service"
+    echo "         $(basename $0) down                              ---> Tear Down Service"
 }
 
 function check_ip() {
@@ -53,6 +56,15 @@ function check_ip() {
     fi
 }
 
+function check_port() {
+    PORT=$1
+    if [[ $PORT =~ ^[0-9]+$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 if [ $# -eq 0 ]; then
     help_msg
     exit 1
@@ -67,9 +79,18 @@ do
     case "$PARAM" in
         --syslog)
             if check_ip $2; then
-                syslogIP=$2
+                SYSLOG_IP=$2
             else
                 echo "IP Format Error"
+                exit 1
+            fi
+            shift
+            ;;
+        --port)
+            if check_port $2; then
+                SYSLOG_PORT=$2
+            else
+                echo "Port Format Error"
                 exit 1
             fi
             shift
