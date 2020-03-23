@@ -58,7 +58,25 @@ docker run --name sf-exporter \
     sysflowtelemetry/sf-exporter:latest
 ```
 
-## Option 2: Full telemetry stack deployment: Sysflow collector probe and S3 exporter
+## Option 2: Local telemetry deployment: One line command deployment with remote syslog server
+
+This deployment will install the Sysflow collection probe and exporter and export the data to remote syslog server.  See below for the deploytment of the full telemetry stack.
+
+## Start local telemetry stack 
+
+> Change the following syslog ip address to yours
+```
+curl -s https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/syslog-deploy/docker/install-docker | bash -s - --syslog 1.2.3.4 up
+```
+
+### Stop local telemetry stack
+If you use the above command to deploy your loca telemetry stack, you will have install-docker.sh locally.
+
+```
+bash install-docker.sh down
+```
+
+## Option 3: Full telemetry stack deployment: Sysflow collector probe and S3 exporter
 > Note: skip this if deploying locally.
 
 ### Create docker secrets
