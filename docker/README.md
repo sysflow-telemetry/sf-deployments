@@ -63,8 +63,6 @@ docker run --name sf-exporter \
 This deployment will install the Sysflow collection probe and exporter and export the data to remote syslog server.  See below for the deploytment of the full telemetry stack.
 
 ## Start local telemetry stack 
-
-> Change the following syslog ip address to yours
 You have to specify your remote syslog server ip address and syslog port number (optional, default is 514).
 ```
 curl -s https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/syslog-deploy/docker/install-docker | bash -s - --syslog 1.2.3.4 (--port 514) up
