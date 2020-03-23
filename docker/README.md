@@ -70,10 +70,9 @@ curl -s https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/syslo
 ```
 
 ### Stop local telemetry stack
-If you use the above command to deploy your loca telemetry stack, you will have install-docker.sh locally.
 
 ```
-bash install-docker.sh down
+curl -s https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/syslog-deploy/docker/install-docker | bash -s - down
 ```
 
 ## Option 3: Full telemetry stack deployment: Sysflow collector probe and S3 exporter
