@@ -20,7 +20,7 @@
 function download_yaml() {
     WORKDIR=$(mktemp -d /tmp/XXXXXX)
     echo "Downloading yaml files to the temp directory: $WORKDIR"
-    curl -s -o $WORKDIR/docker-compose.syslog.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/syslog-deploy/docker/docker-compose.syslog.yml
+    curl -s -o $WORKDIR/docker-compose.syslog.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/master/docker/docker-compose.syslog.yml
 }
 
 function fix_yaml() {
