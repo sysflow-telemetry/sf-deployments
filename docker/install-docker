@@ -20,23 +20,41 @@
 function download_yaml() {
     WORKDIR=$(mktemp -d /tmp/XXXXXX)
     echo "Downloading yaml files to the temp directory: $WORKDIR"
-    curl -s -o $WORKDIR/docker-compose.syslog.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/master/docker/docker-compose.syslog.yml
+    curl -s -o $WORKDIR/docker-compose.syslog.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/$BRANCH/docker/docker-compose.syslog.yml
 }
 
 function fix_yaml() {
     if [ $SYSLOG_PORT ]; then
         sed -i "s/SYSLOG_PORT: .*/SYSLOG_PORT: $SYSLOG_PORT/" $WORKDIR/docker-compose.syslog.yml
     fi
+    
+    if [ $TAG != "latest" ]; then
+        sed -i "s/image: sysflowtelemetry\/sf-exporter:.*/image: sysflowtelemetry\/sf-exporter:$TAG/" $WORKDIR/docker-compose.syslog.yml
+        sed -i "s/image: sysflowtelemetry\/sf-collector:.*/image: sysflowtelemetry\/sf-collector:$TAG/" $WORKDIR/docker-compose.syslog.yml
+    fi
+    
     sed -i "s/SYSLOG_HOST: .*/SYSLOG_HOST: $SYSLOG_IP/" $WORKDIR/docker-compose.syslog.yml
     cp $WORKDIR/docker-compose.syslog.yml $(dirname $0)/docker-compose.syslog.yml
     rm -rf $WORKDIR
 }
 
 function help_msg {
-    echo "Usage: $(basename $0) [--syslog <remote syslog ip>] [--port 514] [up | down]"
-    echo ""
-    echo "Example: $(basename $0) --syslog 1.2.3.4 up --port 514    ---> Bring Up Service"
-    echo "         $(basename $0) down                              ---> Tear Down Service"
+    echo "* "
+    echo "* "
+    echo "* Usage: $(basename $0) [--syslog <remote syslog ip>] [--port 514] "
+    echo "*                  [--branch <branch for github>] [--tag <tag for docker repo>] [up | down]"
+    echo "* "
+    echo "* --syslog  : Specify the IP address of remote syslog server"
+    echo "* --port    : Specify the port number of remote syslog server (default: 514)"
+    echo "* --branch  : Branch name on Github repo for testing purpose (default: dev)"
+    echo "* --tag     : Tag on Docker Hub (default: latest)"
+    echo "* "
+    echo "* Example: $(basename $0) --syslog 1.2.3.4 up                       ---> Bring Up Service"
+    echo "*          $(basename $0) --syslog 1.2.3.4 --port 218 up            ---> Bring Up Service with remote syslog server using port 218"
+    echo "*          $(basename $0) --syslog 1.2.3.4 --tag edge up            ---> Bring Up Service and pull the docker images with tage:edge"
+    echo "*          $(basename $0) down                                      ---> Tear Down Service"
+    echo "* "
+    echo "* "
 }
 
 function check_ip() {
@@ -70,6 +88,8 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
+BRANCH=dev
+TAG=latest
 UP=0
 DOWN=0
 
@@ -95,6 +115,14 @@ do
             fi
             shift
             ;;
+        --branch)
+            BRANCH=$2
+            shift
+            ;;
+        --tag)
+            TAG=$2
+            shift
+            ;;
         up)
             UP=1
             shift
@@ -107,14 +135,12 @@ do
     shift
 done
 
-if [ $UP -eq 1 ];
-then
+if [ $UP -eq 1 ]; then
     download_yaml
     fix_yaml
     docker-compose -f $(dirname $0)/docker-compose.syslog.yml up
 fi
 
-if [ $DOWN -eq 1 ];
-then
+if [ $DOWN -eq 1 ]; then
     docker-compose -f $(dirname $0)/docker-compose.syslog.yml down
 fi
