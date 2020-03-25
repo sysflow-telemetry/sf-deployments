@@ -88,7 +88,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-BRANCH=dev
+BRANCH=master
 TAG=latest
 UP=0
 DOWN=0
