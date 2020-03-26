@@ -19,20 +19,17 @@
 # limitations under the License.
 
 
-if [ "$#" -ne 4 ]; then
-    echo "Required arguments missing!"
-    echo "Usage : ./installExporterChart <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint>"
-    echo "<s3_region> value is the region in the S3 compliant object store (e.g., us-south)"
-    echo "<s3_access_key> is the access key present in S3 compliant service credentials"
-    echo "<s3_secret_key> is the secret key present in S3 compliant service credentials"
-    echo "<s3_endpoint> is the address of the S3 compliant object store (e.g., s3.us-south.cloud-object-storage.appdomain.cloud)"
+if [[ -z "$S3_ACCESS_KEY_ID" || -z "$S3_SECRET_ACCESS_KEY" || -z "$S3_HOSTNAME" || -z "$S3_SYSFLOW_BUCKET" ]]; then
+    echo -e "Error: The following environment varilables are ALL required\n"
+    echo "    S3_ACCESS_KEY_ID     : S3 access key ID"
+    echo "    S3_SECRET_ACCESS_KEY : S3 secret access key"
+    echo "    S3_HOSTNAME          : S3 object store address"
+    echo "    S3_SYSFLOW_BUCKET    : S3 bucket to export data"
+    echo -e "\nExport the missing S3 configurations to continue, e.g."
+    echo -e "$ export S3_HOSTNAME=s3.us-south.cloud-object-storage.appdomain.cloud\n"
+
     exit 1
 fi
-
-s3Region=$1
-s3AccessKey=$2
-s3SecretKey=$3
-s3Endpoint=$4
 
 # Don't run if any of the prerequisites are not installed.
 prerequisites=( "kubectl" "helm" )
@@ -46,23 +43,16 @@ do
   fi
 done
 
-tls='--tls'
-enabled='N'
-tlsStatus=$(helm ls 2>&1)
-if [[ "$tlsStatus" != "Error: transport is closing" ]]; then
-    read -p 'Warning: Helm TLS is not enabled. Do you want to continue? [y/N] ' enabled
-    if [ "$enabled" != "y" ]
-    then
-        echo "Setup helm TLS. Follow https://helm.sh/docs/tiller_ssl/"
-        exit 1
-    fi
-fi
-
 nsCreateCmd=$(kubectl create namespace sysflow 2>&1)
 if [[ "$nsCreateCmd" =~ "already exists" ]]; then
-    echo "Warning: Namespace 'sysflow' already exists. Proceeding with existing namespace."
+    echo "Warning: Namespace 'sysflow' already exists. Proceeding with existing namespace"
 else
     echo "Namespace 'sysflow' created successfully"
 fi
 
-helm install sf-exporter-chart -f sf-exporter-chart/values.yaml.local --namespace sysflow --set sfexporter.s3AccessKey=$s3AccessKey --set sfexporter.s3SecretKey=$s3SecretKey --set sfexporter.s3Endpoint=$s3Endpoint --set sfexporter.s3Location=$s3Region --debug ./sf-exporter-chart
+# TODO: publish sysflow charts to https://kubernetes-charts.storage.googleapis.com,
+#       which is enabled by default, and get rid of below version and repo strings.
+chartVersion="0.1-rc2"
+chartRepo=https://weii666.github.io/charts/
+
+helm install sysflow --set sfexporter.s3AccessKey="${S3_ACCESS_KEY_ID}" --set sfexporter.s3SecretKey="${S3_SECRET_ACCESS_KEY}" --set sfexporter.s3Endpoint="${S3_HOSTNAME}" --set sfexporter.s3Location="not-used" --set sfexporter.s3Bucket="${S3_SYSFLOW_BUCKET}" --set sfexporter.s3Secure=true sf-exporter-chart --version $chartVersion --repo $chartRepo --namespace sysflow --debug

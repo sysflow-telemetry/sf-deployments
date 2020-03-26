@@ -166,7 +166,6 @@ spec:
           readOnly: false
         - mountPath: "/run/secrets/k8s"
           name: secrets
-          subPath: k8s
           readOnly: true
         env:
         - name: S3_ENDPOINT
