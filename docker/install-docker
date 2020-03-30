@@ -1,0 +1,146 @@
+#!/bin/bash
+#
+# Copyright (C) 2019 IBM Corporation.
+#
+# Authors:
+# Jie Liau <wjliau@tw.ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+function download_yaml() {
+    WORKDIR=$(mktemp -d /tmp/XXXXXX)
+    echo "Downloading yaml files to the temp directory: $WORKDIR"
+    curl -s -o $WORKDIR/docker-compose.syslog.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/$BRANCH/docker/docker-compose.syslog.yml
+}
+
+function fix_yaml() {
+    if [ $SYSLOG_PORT ]; then
+        sed -i "s/SYSLOG_PORT: .*/SYSLOG_PORT: $SYSLOG_PORT/" $WORKDIR/docker-compose.syslog.yml
+    fi
+    
+    if [ $TAG != "latest" ]; then
+        sed -i "s/image: sysflowtelemetry\/sf-exporter:.*/image: sysflowtelemetry\/sf-exporter:$TAG/" $WORKDIR/docker-compose.syslog.yml
+        sed -i "s/image: sysflowtelemetry\/sf-collector:.*/image: sysflowtelemetry\/sf-collector:$TAG/" $WORKDIR/docker-compose.syslog.yml
+    fi
+    
+    sed -i "s/SYSLOG_HOST: .*/SYSLOG_HOST: $SYSLOG_IP/" $WORKDIR/docker-compose.syslog.yml
+    cp $WORKDIR/docker-compose.syslog.yml $(dirname $0)/docker-compose.syslog.yml
+    rm -rf $WORKDIR
+}
+
+function help_msg {
+    echo "* "
+    echo "* "
+    echo "* Usage: $(basename $0) [--syslog <remote syslog ip>] [--port 514] "
+    echo "*                  [--branch <branch for github>] [--tag <tag for docker repo>] [up | down]"
+    echo "* "
+    echo "* --syslog  : Specify the IP address of remote syslog server"
+    echo "* --port    : Specify the port number of remote syslog server (default: 514)"
+    echo "* --branch  : Branch name on Github repo for testing purpose (default: master)"
+    echo "* --tag     : Tag value on Docker Hub (default: latest)"
+    echo "* "
+    echo "* Example: $(basename $0) --syslog 1.2.3.4 up                       ---> Bring Up Service"
+    echo "*          $(basename $0) --syslog 1.2.3.4 --port 218 up            ---> Bring Up Service with remote syslog server using port 218"
+    echo "*          $(basename $0) --syslog 1.2.3.4 --tag edge up            ---> Bring Up Service and pull the docker images with tage:edge"
+    echo "*          $(basename $0) down                                      ---> Tear Down Service"
+    echo "* "
+    echo "* "
+}
+
+function check_ip() {
+    IP=$1
+    if [[ $IP =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OCTECT1=$(echo $IP|cut -d. -f1)
+        OCTECT2=$(echo $IP|cut -d. -f2)
+        OCTECT3=$(echo $IP|cut -d. -f3)
+        OCTECT4=$(echo $IP|cut -d. -f4)
+        if [ $OCTECT1 -le 255 -a $OCTECT2 -le 255 -a $OCTECT3 -le 255 -a $OCTECT4 -le 255 ]; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
+
+function check_port() {
+    PORT=$1
+    if [[ $PORT =~ ^[0-9]+$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+if [ $# -eq 0 ]; then
+    help_msg
+    exit 1
+fi
+
+BRANCH=master
+TAG=latest
+UP=0
+DOWN=0
+
+while [ $# -gt 0 ];
+do  
+    PARAM=$1
+    case "$PARAM" in
+        --syslog)
+            if check_ip $2; then
+                SYSLOG_IP=$2
+            else
+                echo "IP Format Error"
+                exit 1
+            fi
+            shift
+            ;;
+        --port)
+            if check_port $2; then
+                SYSLOG_PORT=$2
+            else
+                echo "Port Format Error"
+                exit 1
+            fi
+            shift
+            ;;
+        --branch)
+            BRANCH=$2
+            shift
+            ;;
+        --tag)
+            TAG=$2
+            shift
+            ;;
+        up)
+            UP=1
+            shift
+            ;;
+        down)
+            DOWN=1
+            shift
+            ;;
+    esac
+    shift
+done
+
+if [ $UP -eq 1 ]; then
+    download_yaml
+    fix_yaml
+    docker-compose -f $(dirname $0)/docker-compose.syslog.yml up
+fi
+
+if [ $DOWN -eq 1 ]; then
+    docker-compose -f $(dirname $0)/docker-compose.syslog.yml down
+fi
