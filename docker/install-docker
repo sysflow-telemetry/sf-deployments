@@ -20,39 +20,113 @@
 function download_yaml() {
     WORKDIR=$(mktemp -d /tmp/XXXXXX)
     echo "Downloading yaml files to the temp directory: $WORKDIR"
-    curl -s -o $WORKDIR/docker-compose.syslog.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/$BRANCH/docker/docker-compose.syslog.yml
+    if [ $EXPTYPE == "s3-avro" ]; then
+        curl -s -o $WORKDIR/docker-compose.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/$BRANCH/docker/docker-compose.yml
+        if [[ $SIP == "" ]]; then
+            curl -s -o $WORKDIR/docker-compose.minio.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/$BRANCH/docker/docker-compose.minio.yml
+        fi
+    elif [ $EXPTYPE == "syslog" ]; then
+        curl -s -o $WORKDIR/docker-compose.syslog.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/$BRANCH/docker/docker-compose.syslog.yml
+    else
+        curl -s -o $WORKDIR/docker-compose.collector.yml https://raw.githubusercontent.com/sysflow-telemetry/sf-deployments/$BRANCH/docker/docker-compose.collector.yml
+    fi
 }
 
 function fix_yaml() {
-    if [ $SYSLOG_PORT ]; then
-        sed -i "s/SYSLOG_PORT: .*/SYSLOG_PORT: $SYSLOG_PORT/" $WORKDIR/docker-compose.syslog.yml
-    fi
+    if [ $EXPTYPE == "s3-avro" ]; then
+        if [ $SIP ]; then
+            sed -i "s/S3_ENDPOINT: .*/S3_ENDPOINT: $SIP/" $WORKDIR/docker-compose.yml
+        fi
+
+        if [ $SPORT ]; then
+            sed -i "s/S3_PORT: .*/S3_PORT: $SPORT/" $WORKDIR/docker-compose.yml
+            if [ -f $WORKDIR/docker-compose.minio.yml ]; then
+                sed -i "s/\- \"9000:9000\"/\- \"$SPORT:9000\"/" $WORKDIR/docker-compose.minio.yml
+            fi
+        fi
+
+        if [ $S3TAG != RELEASE.2020-01-25T02-50-51Z ]; then
+            sed -i "s/image: minio\/minio:.*/image: minio\/minio:$S3TAG/" $WORKDIR/docker-compose.minio.yml
+        fi
+
+        if [ $S3TLS -eq 1 ]; then
+            sed -i "s/SECURE: .*/SECURE: \"true\"/" $WORKDIR/docker-compose.yml
+        fi
+        
+        cp $WORKDIR/docker-compose.yml $(dirname $0)/docker-compose.yml
+        if [ -f $WORKDIR/docker-compose.minio.yml ]; then
+            cp $WORKDIR/docker-compose.minio.yml $(dirname $0)/docker-compose.minio.yml
+        fi
+        rm -rf $WORKDIR
+    elif [ $EXPTYPE == "syslog" ]; then
+        if [ $SPORT ]; then
+            sed -i "s/SYSLOG_PORT: .*/SYSLOG_PORT: $SPORT/" $WORKDIR/docker-compose.syslog.yml
+        fi
     
-    if [ $TAG != "latest" ]; then
-        sed -i "s/image: sysflowtelemetry\/sf-exporter:.*/image: sysflowtelemetry\/sf-exporter:$TAG/" $WORKDIR/docker-compose.syslog.yml
-        sed -i "s/image: sysflowtelemetry\/sf-collector:.*/image: sysflowtelemetry\/sf-collector:$TAG/" $WORKDIR/docker-compose.syslog.yml
-    fi
+        if [ $TAG != "latest" ]; then
+            sed -i "s/image: sysflowtelemetry\/sf-exporter:.*/image: sysflowtelemetry\/sf-exporter:$TAG/" $WORKDIR/docker-compose.syslog.yml
+            sed -i "s/image: sysflowtelemetry\/sf-collector:.*/image: sysflowtelemetry\/sf-collector:$TAG/" $WORKDIR/docker-compose.syslog.yml
+        fi
     
-    sed -i "s/SYSLOG_HOST: .*/SYSLOG_HOST: $SYSLOG_IP/" $WORKDIR/docker-compose.syslog.yml
-    cp $WORKDIR/docker-compose.syslog.yml $(dirname $0)/docker-compose.syslog.yml
-    rm -rf $WORKDIR
+        sed -i "s/SYSLOG_HOST: .*/SYSLOG_HOST: $SIP/" $WORKDIR/docker-compose.syslog.yml
+        cp $WORKDIR/docker-compose.syslog.yml $(dirname $0)/docker-compose.syslog.yml
+        rm -rf $WORKDIR
+    else
+        if [ $TAG != "latest" ]; then
+            sed -i "s/image: sysflowtelemetry\/sf-collector:.*/image: sysflowtelemetry\/sf-collector:$TAG/" $WORKDIR/docker-compose.collector.yml
+        fi
+
+        cp $WORKDIR/docker-compose.collector.yml $(dirname $0)/docker-compose.collector.yml
+        rm -rf $WORKDIR
+    fi
+}
+
+function add_key_files() {
+    echo "Adding access key and secret key into $(dirname $0)/secrets/"
+    mkdir $(dirname $0)/secrets/
+    echo $ACCKEY > $(dirname $0)/secrets/access_key
+    echo $SECKEY > $(dirname $0)/secrets/secret_key
+    echo "access key and secret key added into $(dirname $0)/secrets/"
 }
 
 function help_msg {
     echo "* "
     echo "* "
-    echo "* Usage: $(basename $0) [--syslog <remote syslog ip>] [--port 514] "
-    echo "*                  [--branch <branch for github>] [--tag <tag for docker repo>] [up | down]"
+    echo "* Usage: $(basename $0) [--exptype <export type>] [--s3tls] [--s3tag <tag of minio docker image>] [--acckey <s3 access key>] [--seckey <s3 secret key>]"
+    echo "*                  [--ip <remote s3-object-storage/syslog ip>] [--port <remote s3-object-storage/syslog port default: 9000(s3)/514(syslog)>]"
+    echo "*                  [--branch <branch for github>] [--tag <tag of collector/exporter docker image>] [up | down]"
     echo "* "
-    echo "* --syslog  : Specify the IP address of remote syslog server"
-    echo "* --port    : Specify the port number of remote syslog server (default: 514)"
+    echo "* --exptype : Specify export type: local-avro, s3-avro and syslog (default: local-avro)"
+    echo "* --acckey  : Specify the access key for s3 object storage"
+    echo "* --seckey  : Specify the secret key for s3 object storage"
+    echo "* --s3tag   : Tag value on Docker Hub for minio (default: RELEASE.2020-01-25T02-50-51Z)"
+    echo "* --s3tls   : Enable/Disable secure connection to remote s3 object storage (default: disable)"
+    echo "* --ip      : Specify the IP address of remote s3-object-storage/syslog server"
+    echo "* --port    : Specify the port number of remote s3-object-storage/syslog server (default: 9000/514)"
     echo "* --branch  : Branch name on Github repo for testing purpose (default: master)"
-    echo "* --tag     : Tag value on Docker Hub (default: latest)"
+    echo "* --tag     : Tag value on Docker Hub for collector/exporter (default: latest)"
     echo "* "
-    echo "* Example: $(basename $0) --syslog 1.2.3.4 up                       ---> Bring Up Service"
-    echo "*          $(basename $0) --syslog 1.2.3.4 --port 218 up            ---> Bring Up Service with remote syslog server using port 218"
-    echo "*          $(basename $0) --syslog 1.2.3.4 --tag edge up            ---> Bring Up Service and pull the docker images with tage:edge"
-    echo "*          $(basename $0) down                                      ---> Tear Down Service"
+    echo "* Example: For Local collector only: " 
+    echo "*          $(basename $0) up                                              ---> Bring up sf-collector and store collected traces into /mnt/data with avro format"
+    echo "*          $(basename $0) --tag edge up                                   ---> Bring up sf-collector with docker image tag:edge"
+    echo "*"
+    echo "*          For S3 object storage: "
+    echo "*          $(basename $0) --exptype s3-avro --acckey AKIAIOSFODNN7EXAMPLE --seckey wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY up"
+    echo "*                                                                         ---> Bring up service with local s3 object storage: minio"
+    echo "*          $(basename $0) --exptype s3-avro --ip 1.2.3.4 --acckey AKIAIOSFODNN7EXAMPLE --seckey wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY up"
+    echo "*                                                                         ---> Bring up service with remote s3 object storage (http)"
+    echo "*          $(basename $0) --exptype s3-avro --s3tls --ip 1.2.3.4 --acckey AKIAIOSFODNN7EXAMPLE --seckey wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY up"
+    echo "*                                                                         ---> Bring up service with remote s3 object storage (https)"
+    echo "*"
+    echo "*          For remote syslog server: "
+    echo "*          $(basename $0) --exptype syslog --ip 1.2.3.4 up                ---> Bring up service"
+    echo "*          $(basename $0) --exptype syslog --ip 1.2.3.4 --port 218 up     ---> Bring up service with remote syslog server using port 218"
+    echo "*          $(basename $0) --exptype syslog --ip 1.2.3.4 --tag edge up     ---> Bring up service and pull the docker images with tag:edge"
+    echo "* "
+    echo "*          Tear down service: "
+    echo "*          $(basename $0) down                                            ---> Tear down service (It will tear down sf-collector by default)"
+    echo "*          $(basename $0) --exptype s3-avro down                          ---> Tear down service with s3 object storage deployment"
+    echo "*          $(basename $0) --exptype syslog down                           ---> Tear down service with remote syslog server deployment"
     echo "* "
     echo "* "
 }
@@ -89,7 +163,10 @@ if [ $# -eq 0 ]; then
 fi
 
 BRANCH=master
+S3TAG=RELEASE.2020-01-25T02-50-51Z
+S3TLS=0
 TAG=latest
+EXPTYPE=local-avro
 UP=0
 DOWN=0
 
@@ -97,20 +174,45 @@ while [ $# -gt 0 ];
 do  
     PARAM=$1
     case "$PARAM" in
-        --syslog)
+        --help|-h)
+            help_msg
+            shift
+            ;;
+        --exptype)
+            if [[ $2 == "s3-avro" ]] || [[ $2 == "syslog" ]] || [[ $2 == "local-avro" ]]; then
+                EXPTYPE=$2
+            else
+                help_msg
+                exit 1
+            fi
+            shift
+            ;;
+        --acckey)
+            ACCKEY=$2
+            shift
+            ;;
+        --seckey)
+            SECKEY=$2
+            shift
+            ;;
+        --ip)
             if check_ip $2; then
-                SYSLOG_IP=$2
+                SIP=$2
             else
                 echo "IP Format Error"
+                echo "* "
+                help_msg
                 exit 1
             fi
             shift
             ;;
         --port)
             if check_port $2; then
-                SYSLOG_PORT=$2
+                SPORT=$2
             else
                 echo "Port Format Error"
+                echo "* "
+                help_msg
                 exit 1
             fi
             shift
@@ -119,8 +221,16 @@ do
             BRANCH=$2
             shift
             ;;
+        --s3tag)
+            S3TAG=$2
+            shift
+            ;;
         --tag)
             TAG=$2
+            shift
+            ;;
+        --s3tls)
+            S3TLS=1
             shift
             ;;
         up)
@@ -135,12 +245,69 @@ do
     shift
 done
 
+if [ $EXPTYPE == "s3-avro" ] && [[ $ACCKEY == "" ]] && [ $UP -eq 1 ]; then
+    echo "*"
+    echo -e "* \e[1;31;47m You have to specify access key and secret key when export type is s3-avro \e[0m"
+    help_msg
+    exit 1
+fi
+
+if [ $EXPTYPE == "s3-avro" ] && [[ $SECKEY == "" ]] && [ $UP -eq 1 ]; then
+    echo "*"
+    echo -e "* \e[1;31;47m You have to specify access key and secret key when export type is s3-avro \e[0m"
+    help_msg
+    exit 1
+fi
+
+if [ $EXPTYPE == "syslog" ] && [[ $IP == "" ]] && [ $UP -eq 1 ]; then
+    echo "*"
+    echo -e "* \e[1;31;47m You have to specify IP address of remote syslog server when export type is syslog \e[0m"
+    help_msg
+    exit 1
+fi
+
+if [ $UP -eq 0 ] && [ $DOWN -eq 0 ]; then
+    help_msg
+    exit 1
+fi
+
 if [ $UP -eq 1 ]; then
     download_yaml
     fix_yaml
-    docker-compose -f $(dirname $0)/docker-compose.syslog.yml up
+    if [ $EXPTYPE == "s3-avro" ]; then
+        add_key_files
+        if [ -f $(dirname $0)/docker-compose.minio.yml ]; then
+            docker-compose -f $(dirname $0)/docker-compose.minio.yml -f $(dirname $0)/docker-compose.yml up
+        else
+            docker-compose -f $(dirname $0)/docker-compose.yml up
+        fi
+    elif [ $EXPTYPE == "syslog" ]; then
+        docker-compose -f $(dirname $0)/docker-compose.syslog.yml up
+    else
+        docker-compose -f $(dirname $0)/docker-compose.collector.yml up
+    fi
 fi
 
 if [ $DOWN -eq 1 ]; then
-    docker-compose -f $(dirname $0)/docker-compose.syslog.yml down
+    if [ $EXPTYPE == "s3-avro" ]; then
+        if [  -f $(dirname $0)/docker-compose.minio.yml ]; then
+            docker-compose -f $(dirname $0)/docker-compose.minio.yml -f $(dirname $0)/docker-compose.yml down
+            echo "Deleting yaml files. $(dirname $0)/docker-compose.minio.yml and $(dirname $0)/docker-compose.yml"
+            rm -f $(dirname $0)/docker-compose.minio.yml $(dirname $0)/docker-compose.yml
+        else
+            docker-compose -f $(dirname $0)/docker-compose.yml down
+            echo "Deleting yaml files. $(dirname $0)/docker-compose.yml"
+            rm -f $(dirname $0)/docker-compose.yml
+        fi
+        echo "Deleting keys files. $(dirname $0)/secrets/"
+        rm -rf $(dirname $0)/secrets/
+    elif [ $EXPTYPE == "syslog" ]; then
+        docker-compose -f $(dirname $0)/docker-compose.syslog.yml down
+        echo "Deleting yaml files. $(dirname $0)/docker-compose.syslog.yml"
+        rm -f $(dirname $0)/docker-compose.syslog.yml
+    else
+        docker-compose -f $(dirname $0)/docker-compose.collector.yml down
+        echo "Deleting yaml files. $(dirname $0)/docker-compose.collector.yml"
+        rm -f $(dirname $0)/docker-compose.collector.yml
+    fi
 fi
