@@ -111,11 +111,11 @@ function help_msg {
     echo "*          $(basename $0) --tag edge up                                   ---> Bring up sf-collector with docker image tag:edge"
     echo "*"
     echo "*          For S3 object storage: "
-    echo "*          $(basename $0) --exptype s3-avro --acckey AKIAIOSFODNN7EXAMPLE --seckey wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY up"
+    echo "*          $(basename $0) --exptype s3-avro --acckey [s3 access key] --seckey [s3 secret key] up"
     echo "*                                                                         ---> Bring up service with local s3 object storage: minio"
-    echo "*          $(basename $0) --exptype s3-avro --ip 1.2.3.4 --acckey AKIAIOSFODNN7EXAMPLE --seckey wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY up"
+    echo "*          $(basename $0) --exptype s3-avro --ip 1.2.3.4 --acckey [s3 access key] --seckey [s3 secret key] up"
     echo "*                                                                         ---> Bring up service with remote s3 object storage (http)"
-    echo "*          $(basename $0) --exptype s3-avro --s3tls --ip 1.2.3.4 --acckey AKIAIOSFODNN7EXAMPLE --seckey wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY up"
+    echo "*          $(basename $0) --exptype s3-avro --s3tls --ip 1.2.3.4 --acckey [s3 access key] --seckey [s3 secret key] up"
     echo "*                                                                         ---> Bring up service with remote s3 object storage (https)"
     echo "*"
     echo "*          For remote syslog server: "
@@ -277,14 +277,14 @@ if [ $UP -eq 1 ]; then
     if [ $EXPTYPE == "s3-avro" ]; then
         add_key_files
         if [ -f $(dirname $0)/docker-compose.minio.yml ]; then
-            docker-compose -f $(dirname $0)/docker-compose.minio.yml -f $(dirname $0)/docker-compose.yml up
+            docker-compose -f $(dirname $0)/docker-compose.minio.yml -f $(dirname $0)/docker-compose.yml up -d
         else
-            docker-compose -f $(dirname $0)/docker-compose.yml up
+            docker-compose -f $(dirname $0)/docker-compose.yml up -d
         fi
     elif [ $EXPTYPE == "syslog" ]; then
-        docker-compose -f $(dirname $0)/docker-compose.syslog.yml up
+        docker-compose -f $(dirname $0)/docker-compose.syslog.yml up -d
     else
-        docker-compose -f $(dirname $0)/docker-compose.collector.yml up
+        docker-compose -f $(dirname $0)/docker-compose.collector.yml up -d
     fi
 fi
 
@@ -299,7 +299,7 @@ if [ $DOWN -eq 1 ]; then
             echo "Deleting yaml files. $(dirname $0)/docker-compose.yml"
             rm -f $(dirname $0)/docker-compose.yml
         fi
-        echo "Deleting keys files. $(dirname $0)/secrets/"
+        echo "Deleting key files. $(dirname $0)/secrets/"
         rm -rf $(dirname $0)/secrets/
     elif [ $EXPTYPE == "syslog" ]; then
         docker-compose -f $(dirname $0)/docker-compose.syslog.yml down
