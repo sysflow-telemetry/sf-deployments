@@ -32,7 +32,13 @@ This image is the Red Hat OpenShift (OC) Operator for deploying both the SysFlow
 
 # How to use this image
 
-Please see the detailed documentation on deploying the operator [here](https://github.com/sysflow-telemetry/sf-deployments/tree/master/operator/OVERVIEW.md)
+Providing S3 config with environment variables, run `deployAll`:
+
+```
+S3_ACCESS_KEY_ID=<your_acs_key> S3_SECRET_ACCESS_KEY=<your_sec_key> S3_HOSTNAME=<e.g. s3.us-south.cloud-object-storage.appdomain.cloud> S3_SYSFLOW_BUCKET=<e.g. sf-monitoring> ./deployAll
+```
+
+For more details deploying the operator, please see the documentation [here](https://github.com/sysflow-telemetry/sf-deployments/tree/master/operator/OVERVIEW.md)
 
 # License
 
