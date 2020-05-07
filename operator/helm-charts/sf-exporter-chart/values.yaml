@@ -12,6 +12,7 @@ sfcollector:
   tag: edge
   imagePullPolicy: Always
 sfexporter:
+  exportType: s3
   interval: 30
   outDir: /mnt/data/
   repository: sysflowtelemetry/sf-exporter
@@ -22,6 +23,8 @@ sfexporter:
   s3Port: 9000
   s3SecretKey: <s3_secret_key>
   s3Secure: "false"
+  syslogHost: localhost
+  syslogPort: 514
   tag: edge
   imagePullPolicy: Always
 tmpfsSize: 500Mi
