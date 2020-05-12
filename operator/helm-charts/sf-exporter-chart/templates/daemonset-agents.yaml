@@ -131,9 +131,9 @@ spec:
         - mountPath: {{ .Values.sfexporter.outDir }}
           name: data
           readOnly: false
-#       - mountPath: "/run/secrets/k8s"
-#         name: secrets
-#         readOnly: true
+        - mountPath: "/run/secrets/k8s"
+          name: secrets
+          readOnly: true
         env:
         - name: EXPORT_TYPE
           value: {{ .Values.sfexporter.exportType }}
@@ -188,14 +188,14 @@ spec:
             fieldRef:
               fieldPath: spec.serviceAccountName
       volumes:
-#     - name: secrets
-#       secret:
-#         secretName: {{ template "sf-exporter-chart.fullname" . }}-secrets
-#         items:
-#         - key: s3_access_key
-#           path: "s3_access_key"
-#         - key: s3_secret_key
-#           path: "s3_secret_key"
+      - name: secrets
+        secret:
+          secretName: {{ template "sf-exporter-chart.fullname" . }}-secrets
+          items:
+          - key: s3_access_key
+            path: "s3_access_key"
+          - key: s3_secret_key
+            path: "s3_secret_key"
       - name: data
         emptyDir:
           medium: Memory
