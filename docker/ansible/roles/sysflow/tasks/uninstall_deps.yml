@@ -1,0 +1,12 @@
+---
+# Install dependencies
+
+- name: Import install_deps_deb.yml if OS distribution is Ubuntu or Debian
+  import_tasks: install_deps_deb.yml
+  when: ansible_distribution == "Ubuntu" or  ansible_distribution == "Debian"
+
+- name: Import install_debian.yml if OS distribution is CentOS
+  import_tasks: install_deps_el.yml
+  when: ansible_distribution == "CentOS"
+
+

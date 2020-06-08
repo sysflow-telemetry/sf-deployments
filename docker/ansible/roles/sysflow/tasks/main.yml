@@ -1,0 +1,22 @@
+---
+# Configure and deploys SysFlow stack
+
+- name: Install dependencies
+  import_tasks: install_deps.yml
+
+- name: Import copy_resources.yml
+  import_tasks: copy_resources.yml
+
+- name: Import copy_secrets.yml if sysflow desired state is present
+  import_tasks: copy_secrets.yml
+  when: sysflow_desired_state == "present"
+
+- include: install_sysflow.yml
+
+- name: Import rm_resources.yml if sysflow desired state is absent
+  import_tasks: rm_resources.yml
+  when: sysflow_desired_state == "absent"
+
+- name: Uninstall dependencies is sysflow dependencies desired state is absent
+  import_tasks: uninstall_deps.yml
+  when: sysflow_dependencies_desired_state == "absent"

@@ -1,0 +1,63 @@
+#
+# Copyright (C) 2019 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+version: "3.5"
+services:
+  sf-exporter:
+    container_name: sf-exporter
+    image: sysflowtelemetry/sf-exporter:{{ sysflow_tag }}
+    secrets:
+      - s3_access_key
+      - s3_secret_key
+    volumes:
+      - sfdata:/mnt/data
+    environment:
+      S3_ENDPOINT: "{{ s3_endpoint }}" 
+      S3_PORT: {{ s3_port }}
+      S3_LOCATION: "{{ s3_location }}"
+      S3_BUCKET: "{{ s3_bucket }}"
+      SECURE: "{{ s3_secure }}"
+      INTERVAL: {{ s3_export_interval}}
+      NODE_IP: "{{ inventory_hostname }}"
+      DIR: /mnt/data
+    depends_on:
+      - sf-collector
+  sf-collector:
+    container_name: sf-collector
+    image: sysflowtelemetry/sf-collector:{{ sysflow_tag }}
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock 
+      - /dev:/host/dev 
+      - /proc:/host/proc:ro 
+      - /boot:/host/boot:ro 
+      - /lib/modules:/host/lib/modules:ro 
+      - /usr:/host/usr:ro
+      - sfdata:/mnt/data
+    environment:
+      EXPORTER_ID: local
+      FILTER: "container.name!=sf-collector and container.name!=sf-exporter" 
+      INTERVAL: {{ sysflow_trace_rolling_interval }} 
+      OUTPUT: /mnt/data/
+volumes:
+  sfdata:
+secrets:
+  s3_access_key:
+    file: {{ sysflow_install_path }}/secrets/s3_access_key
+  s3_secret_key:
+    file: {{ sysflow_install_path }}/secrets/s3_secret_key

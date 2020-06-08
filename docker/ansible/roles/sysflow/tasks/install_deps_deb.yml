@@ -1,0 +1,9 @@
+---
+
+- name: Install dependencies for SysFlow if OS distribution is Ubuntu or Debian
+  apt:
+    pkg:
+      - python3-docker
+      - python-docker
+      - docker-compose
+      - linux-headers-{{ ansible_kernel }}

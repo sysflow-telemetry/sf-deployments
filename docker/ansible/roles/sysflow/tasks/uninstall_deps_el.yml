@@ -1,0 +1,8 @@
+---
+
+- name: Uninstall dependencies for docker compose if OS distribution is CentOS
+  yum:
+    name:
+      - python-docker-py
+      - docker-compose
+    state: absent

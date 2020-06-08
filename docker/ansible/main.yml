@@ -1,0 +1,9 @@
+---
+# This playbook deploys the sysflow stack to the target environment.
+
+- name: Deploy sysflow telemetry stack to target hosts
+  hosts: endpoints
+  become: yes
+
+  roles:
+    - sysflow

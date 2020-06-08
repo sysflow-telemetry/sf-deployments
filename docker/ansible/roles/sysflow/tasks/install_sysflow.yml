@@ -1,0 +1,22 @@
+---
+# Install SysFlow stack
+
+- name: Ensure SysFlow is not running
+  docker_compose:
+    project_src: "{{ sysflow_install_path }}"
+    state: absent
+
+- name: Install SysFlow
+  docker_compose:
+    project_src: "{{ sysflow_install_path }}"
+    state: "{{ sysflow_desired_state }}"
+  register: output
+
+- debug:
+    var: output
+
+- name: Checking SysFlow status
+  assert:
+    that:
+      - "output.changed==false or output.services['sf-exporter']['sf-exporter'].state.running==true"
+      - "output.changed==false or output.services['sf-collector']['sf-collector'].state.running==true"

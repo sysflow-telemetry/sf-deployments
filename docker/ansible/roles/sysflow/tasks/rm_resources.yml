@@ -1,0 +1,8 @@
+---
+# Remoce resources to target environment
+
+- name: Ensure installation directory desired state
+  file:
+    path: "{{ sysflow_install_path }}"
+    state: absent
+

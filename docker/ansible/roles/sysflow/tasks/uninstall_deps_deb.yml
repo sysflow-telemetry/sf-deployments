@@ -1,0 +1,8 @@
+---
+
+- name: Uninstall dependencies for docker compose if OS distribution is Ubuntu or Debian
+  apt:
+    pkg:
+      - python-docker
+      - docker-compose
+    state: absent

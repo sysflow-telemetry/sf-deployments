@@ -1,0 +1,16 @@
+---
+# Default variables used by the role.
+# These don't have to be explicitly imported by vars_files: they are autopopulated.
+
+sysflow_desired_state: present
+sysflow_dependencies_desired_state: present
+sysflow_install_docker: true
+sysflow_tag: edge
+sysflow_trace_rolling_interval: 30
+sysflow_install_path: /var/lib/sysflow
+s3_endpoint: localhost
+s3_port: 9000
+s3_location: us-south
+s3_bucket: sysflow-telemetry
+s3_secure: false
+s3_export_interval: 60
