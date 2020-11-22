@@ -1,0 +1,40 @@
+{{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: sysflow-scc
+  labels:
+    {{- include "sysflowagent.labels" . | nindent 4 }}
+priority: 11
+requiredDropCapabilities: []
+allowPrivilegedContainer: true
+allowHostDirVolumePlugin: true
+allowHostNetwork: false
+allowHostPorts: false
+allowHostPID: false
+allowHostIPC: false
+readOnlyRootFilesystem: false
+allowedCapabilities:
+- SYS_ADMIN
+- SYS_RESOURCE
+defaultAddCapabilities:
+- SYS_ADMIN
+- SYS_RESOURCE
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+users:
+- sysflow-agent
+- sysflow-operator
+volumes:
+- configMap
+- emptyDir
+- hostPath
+- persistentVolumeClaim
+- secret
+{{- end }}
