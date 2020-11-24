@@ -51,13 +51,8 @@ enabled='N'
 tlsStatus=$(helm ls 2>&1)
 if [[ "$tlsStatus" != "Error: transport is closing" ]]; then
     read -p 'Warning: Helm TLS is not enabled. Do you want to continue? [y/N] ' enabled
-    if [ "$enabled" == "y" ]
+    if [ "$enabled" != "y" ]
     then
-        helm init --client-only
-        echo "Sleeping for 10 seconds so that tiller pod is ready"
-        sleep 10
-        tls=''
-    else
         echo "Setup helm TLS. Follow https://helm.sh/docs/tiller_ssl/"
         exit 1
     fi
@@ -70,4 +65,4 @@ else
     echo "Namespace 'sysflow' created successfully"
 fi
 
-helm install -n  sf-exporter-chart -f sf-exporter-chart/values.yaml.local --namespace sysflow --set sfexporter.s3AccessKey=$s3AccessKey --set sfexporter.s3SecretKey=$s3SecretKey --set sfexporter.s3Endpoint=$s3Endpoint --set sfexporter.s3Location=$s3Region --debug sf-exporter-chart
+helm install sf-exporter-chart -f sf-exporter-chart/values.yaml --namespace sysflow --set sfexporter.s3AccessKey=$s3AccessKey --set sfexporter.s3SecretKey=$s3SecretKey --set sfexporter.s3Endpoint=$s3Endpoint --set sfexporter.s3Location=$s3Region --debug ./sf-exporter-chart

@@ -10,12 +10,13 @@ NOTE: This document has been tested with helm version 2.12, 2.16, and 3.1.  Some
 
 ## Prerequisites
 
-1. Install Helm: https://helm.sh/ 
-2. Setup TLS for Helm: https://v2.helm.sh/docs/tiller_ssl/
-3. S3 compliant object store - Currently tested with IBM's cloud object store, and minio object store (https://docs.min.io/). 
+Install Helm V3+: https://helm.sh/
+
+The following steps are for S3 exporter usage, not requried by SysFlow agent:
+1. S3 compliant object store - Currently tested with IBM's cloud object store, and minio object store (https://docs.min.io/).
     * Setup IBM Cloud Object store: https://cloud.ibm.com/docs/services/cloud-object-storage/iam?topic=cloud-object-storage-getting-started
-5. Create Cloud Object Store HMAC Access ID, and Secret Key.
-    * For IBM Cloud Object store: https://cloud.ibm.com/docs/services/cloud-object-storage/iam?topic=cloud-object-storage-service-credentials 
+2. Create Cloud Object Store HMAC Access ID, and Secret Key.
+    * For IBM Cloud Object store: https://cloud.ibm.com/docs/services/cloud-object-storage/iam?topic=cloud-object-storage-service-credentials
 
 ## Clone the Repository
 
@@ -29,7 +30,7 @@ cd sf-deployments/helm
 
 The sf-exporter-chart resides in the `sf-exporter-chart` folder.  The exporter chart is a kubernetes daemonset, which deploys the sf-collector, and the sf-exporter to each node in the cluster.  The sf-collector monitors the node, and writes sysflow to a shared mount `/mnt/data`.  The sf-exporter reads from the `/mnt/data` and pushes completed files to an S3 compliant object store for analysis before deleting them.  
 
-An install script called `./installExporterChart` is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets. To use it, first go into the sf-exporter-chart directory and copy `values.yaml` to `values.yaml.local` and begin tailoring this yaml to your environment. Note that some of values set in here are passable through the installation script for safety reasons.  Note that the install and delete scripts assume that tls is NOT installed.  To support tls, simply add `--tls` to the helm commands at the bottom of each file.
+An install script called `./installS3Exporter.sh` is provided to make using the helm chart easier.  This script sets up the environment including k8s secrets.
 
 ```
 registry:
@@ -95,38 +96,23 @@ Kubernetes can use different container runtimes.  Older versions used the docker
 you are using based on the sock file you refer too in the `criPath` variable.  If you are using the `docker` runtime, leave `criPath` blank.  If you are using containerd, set `criPath` to "/var/run/containerd/containerd.sock" and if you are using crio, set `criPath` to "/var/run/crio/crio.sock".
 If SysFlow files are empty or the container name variable is set to `incomplete` in SysFlow traces, this typically means that the runtime socket is not connected properly.
 
-There are two versions of the install script.  One in `sf-deployments/helm/helm-scpts-v2` works with helm version 2, while the other in `sf-deployments/helm/helm-scpts-v3` works with version 3. Run the script from the `helm` directory. For example:
-```
-./helm-scpts-v2/installExporterChart <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint>
-   <s3_region> value is the region in the S3 compliant object store (e.g., us-south)
-   <s3_access_key> is the access key present in S3 compliant service credentials
-   <s3_secret_key> is the secret key present in S3 compliant service credentials
-   <s3_endpoint> is the address of the S3 compliant object store (e.g., s3.us-south.cloud-object-storage.appdomain.cloud)
-```
-
-
-Note the install script installs the pods into a K8s namespace called `sysflow`
-
+Note the script, installS3Exporter.sh, installs the pods into a K8s namespace called `sysflow`
 To check that the install worked, run:
-
 ```
 kubectl get pods -n sysflow
 ```
 
 To check the log output of the collector container in a pod:
-
 ```
 kubectl logs -f -c sfcollector <podname>  -n sysflow
 ```
 
 To check the log output of the exporter container in a pod:
-
 ```
 kubectl logs -f -c sfexporter <podname>  -n sysflow
 ```
 
 To delete the exporter chart run:
-
 ```
-./helm-scpts-v2/deleteExporterChart
+./scripts/deleteS3Exporter.sh
 ```

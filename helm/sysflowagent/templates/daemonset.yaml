@@ -1,0 +1,200 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "sysflowagent.fullname" . }}
+  labels:
+    {{- include "sysflowagent.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "sysflowagent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sysflowagent.labels" . | nindent 8 }}
+      annotations:
+        {{- toYaml .Values.productAnnotations | nindent 8 }}
+    spec:
+      serviceAccountName: sysflow-agent
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      containers:
+      - name: sfprocessor
+        image: {{ .Values.sfprocessor.repository }}:{{ .Values.sfprocessor.tag }}
+        imagePullPolicy: {{ .Values.sfprocessor.imagePullPolicy | default "" | quote }}
+        livenessProbe:
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        env:
+        - name: DRIVER
+          value: socket
+        - name: INPUT_PATH
+          value: /sock/sysflow.sock
+        - name: POLICYENGINE_MODE
+          value: alert
+        - name: EXPORTER_TYPE
+          value: telemetry
+        - name: EXPORTER_EXPORT
+          value: {{ .Values.sfprocessor.export | default "terminal" | quote }}
+        - name: EXPORTER_SOURCE
+          value: sysflow
+        - name: EXPORTER_HOST
+          value: {{ .Values.sfprocessor.syslogHost | quote }}
+        - name: EXPORTER_PORT
+          value: {{ .Values.sfprocessor.syslogPort | default 514 | quote }}
+        - name: EXPORTER_PROTO
+          value: {{ .Values.sfprocessor.syslogProto | quote }}
+        - name: LICENSE_ACCEPT
+          value: {{ .Values.license | quote }}
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: dockersock
+          readOnly: false
+        - mountPath: /sock
+          name: sysflowsock
+          readOnly: false
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000570000
+      - name: sfcollector
+        image: {{ .Values.sfcollector.repository }}:{{ .Values.sfcollector.tag }}
+        imagePullPolicy: {{ .Values.sfcollector.imagePullPolicy | default "" | quote }}
+        livenessProbe:
+          {{- toYaml .Values.livenessProbe | nindent 10 }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        env:
+        - name: SOCK_FILE
+          value: /sock/sysflow.sock
+        - name: FILTER
+          value: {{ .Values.sfcollector.filter | quote }}
+        - name: INTERVAL
+          value: {{ .Values.sfcollector.interval | quote }}
+        - name: CRI_PATH
+          value: ""
+        - name: CRI_TIMEOUT
+          value: "5"
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: EXPORTER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: POD_UUID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+        volumeMounts:
+        - mountPath: /sock
+          name: sysflowsock
+          readOnly: false
+        - mountPath: /host/var/run/docker.sock
+          name: dockersock
+          readOnly: false
+        - mountPath: /host/var/run/crio
+          name: varrun-vol-crio
+          readOnly: false
+        - mountPath: /host/run/containerd
+          name: vol-containerd
+          readOnly: false
+        - mountPath: /host/dev
+          name: dev
+          readOnly: false
+        - mountPath: /host/proc
+          name: proc
+          readOnly: true
+        - mountPath: /host/boot
+          name: boot
+          readOnly: true
+        - mountPath: /host/lib/modules
+          name: modules
+          readOnly: true
+        - mountPath: /host/usr
+          name: usr
+          readOnly: true
+        securityContext:
+          allowPrivilegeEscalation: true
+          privileged: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+          runAsUser: 0
+      volumes:
+#     - name: secrets
+#       secret:
+#         secretName: {{ template "sysflowagent.fullname" . }}
+#         items:
+#         - key: s3_access_key
+#           path: "s3_access_key"
+#       - key: s3_secret_key
+#         path: "s3_secret_key"
+      - name: sysflowsock
+        emptyDir: {}
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: varrun-vol-crio
+        hostPath:
+          path: /var/run/crio
+      - name: vol-containerd
+        hostPath:
+          path: /run/containerd
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: proc
+        hostPath:
+          path: /proc
+      - name: boot
+        hostPath:
+          path: /boot
+      - name: modules
+        hostPath:
+          path: /lib/modules
+      - name: usr
+        hostPath:
+          path: /usr
