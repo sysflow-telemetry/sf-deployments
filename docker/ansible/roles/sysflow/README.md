@@ -2,7 +2,7 @@
 
 Role to install (_by default_) [sysflow](https://github.com/sysflow-telemetry/) stack or uninstall (_if passed as var_) on **Ubuntu**, **Debian** and **CentOS** systems.
 
-Tested on Ubuntu 18.04 LTS, Ubuntu 16.04 LTS, Debian ..., and CentOS 7.
+Tested on Ubuntu 18.04 LTS.
 
 ## Requirements
 
