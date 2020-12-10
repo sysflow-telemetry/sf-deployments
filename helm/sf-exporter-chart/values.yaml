@@ -26,6 +26,8 @@ registry:
 
 # sysflow collection probe parameters
 sfcollector:
+  # Comment out if you always want to pull images 
+  imagepullpolicy: IfNotPresent
   # image repository
   repository: sysflowtelemetry/sf-collector
   # image tag
@@ -36,16 +38,34 @@ sfcollector:
   outDir: /mnt/data/
   # collection filter
   filter: "\"container.type!=host and container.name!=sfexporter and container.name!=sfcollector\""
-  #Use this criPath if running docker runtime
+  # Use this criPath if running docker runtime
   criPath: ""
-  #uUse this criPath if running containerd runtime
+  # Use this criPath if running containerd runtime
   #criPath: "/var/run/containerd/containerd.sock"
-  #uUse this criPath if running crio runtime
+  # Use this criPath if running crio runtime
   #criPath: "/var/run/crio/crio.sock"
-  
+  # enable drop mode removes syscalls inside the kernel before they are passed up to the collector
+  # results in much better performance, less drops, but does remove mmaps from output
+  dropMode: false
+  # filters out any descriptor that is not a file, including usenix sockets and pipes
+  fileOnly: false
+  # enables the creation of process flows
+  procFlow: false
+  #sets mode for reads: "0" enables recording all file reads as flows.  "1" disables all file reads.
+  # "2" disables recording file reads to noisy directories: "/proc/", "/dev/",   "/sys/",     "//sys/",
+  #  "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
+  readMode: "0"
+  # enable ebpf mode - required for minikube
+  ebpf: false
+  # mount etc directory in container - required for minikube and Google COS
+  mountEtc:  false
+
+
   
 # sysflow exporter parameters
 sfexporter:
+  # Comment out if you always want to pull images 
+  imagepullpolicy: IfNotPresent
   # image repository
   repository: sysflowtelemetry/sf-exporter
   # image tag
@@ -57,9 +77,9 @@ sfexporter:
   # object store address (overridden by install script)
   s3Endpoint: "<ip address>"
   # object store port
-  s3Port: 443
+  s3Port: 9000
   # object store bucket where to push traces
-  s3Bucket: "<sysflow bucket name>"
+  s3Bucket: "<s3 bucket>"
   # object store location (overridden by install script)
   s3Location:  "<s3 region>"
   # object store access key (overridden by install script)

@@ -79,6 +79,32 @@ spec:
           value: {{ .Values.sfcollector.outDir }}
         - name: LOCATION
           value: {{ .Values.sfexporter.s3Location }}
+        {{- if .Values.sfcollector.ebpf }}
+        - name: SYSDIG_BPF_PROBE
+          value: ""
+        {{- end }}
+        {{- if .Values.sfcollector.dropMode }}
+        - name: ENABLE_DROP_MODE
+          value: "1"
+        {{- end }}
+        {{- if .Values.sfcollector.fileOnly }}
+        - name: FILE_ONLY
+          value: "1"
+        {{- end }}
+        {{- if .Values.sfcollector.procFlow }}
+        - name: ENABLE_PROC_FLOW
+          value: "1"
+        {{- end }}
+        {{- if eq .Values.sfcollector.readMode "1" }}
+        - name: FILE_READ_MODE
+          value: "1"
+        {{- else if eq .Values.sfcollector.readMode "2" }}
+        - name: FILE_READ_MODE
+          value: "2"
+        {{- else }}
+        - name: FILE_READ_MODE
+          value: "0"
+        {{- end }}
         - name: NODE_NAME
           valueFrom:
             fieldRef:
@@ -123,23 +149,14 @@ spec:
         - mountPath: {{ .Values.sfcollector.outDir }}
           name: data
           readOnly: false
-        {{- if .Values.sfcollector.criPath }}
-        {{- if eq .Values.sfcollector.criPath "/var/run/containerd/containerd.sock"}}
-        - mountPath: /host/var/run/containerd/containerd.sock
-          name: containerd-vol
-          readOnly: false
-        {{- end }}
-        {{- end }}
-        {{- if .Values.sfcollector.criPath }}
-        {{- if eq .Values.sfcollector.criPath "/var/run/crio/crio.sock"}}
-        - mountPath: /host/var/run/crio/crio.sock
-          name: varrun-vol-crio
+        - mountPath: /host/var/run
+          name: varrun
           readOnly: false 
+        {{- if (and .Values.sfcollector.ebpf .Values.sfcollector.mountEtc) }}
+        - mountPath: /host/etc
+          name: etc-fs
+          readOnly: true
         {{- end }}
-        {{- end }}
-        - mountPath: /host/var/run/docker.sock
-          name: dockersock
-          readOnly: false 
         - mountPath: /host/dev
           name: dev
           readOnly: false
@@ -166,7 +183,7 @@ spec:
           readOnly: false
         - mountPath: "/run/secrets/k8s"
           name: secrets
-          subPath: k8s
+          #subPath: k8s
           readOnly: true
         env:
         - name: S3_ENDPOINT
@@ -224,27 +241,18 @@ spec:
             path: "s3_access_key"
           - key: s3_secret_key
             path: "s3_secret_key"
+      {{- if (and .Values.sfcollector.ebpf .Values.sfcollector.mountEtc) }}
+      - name: etc-fs
+        hostPath:
+          path: /etc
+      {{- end }}
       - name: data
         emptyDir:
           medium: Memory
           sizeLimit: {{ .Values.tmpfsSize }}
-      {{- if .Values.sfcollector.criPath }}
-      {{- if eq .Values.sfcollector.criPath "/var/run/containerd/containerd.sock"}}
-      - name: containerd-vol
+      - name: varrun
         hostPath:
-          path: /var/run/containerd/containerd.sock
-      {{- end }}
-      {{- end }}
-      - name: dockersock
-        hostPath:
-          path: /var/run/docker.sock
-      {{- if .Values.sfcollector.criPath }}
-      {{- if eq .Values.sfcollector.criPath "/var/run/crio/crio.sock"}}
-      - name: varrun-vol-crio
-        hostPath:
-          path: /var/run/crio/crio.sock 
-      {{- end }}
-      {{- end }}
+          path: /var/run
       - name: dev
         hostPath:
           path: /dev
