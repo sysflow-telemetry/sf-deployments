@@ -1,3 +1,4 @@
+#!/bin/bash
 #
 # Copyright (C) 2020 IBM Corporation.
 #
@@ -12,19 +13,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: sysflow-agent
-  labels:
-    {{- include "sysflowagent.labels" . | nindent 4 }}
-rules:
-- apiGroups:
-  - security.openshift.io
-  resourceNames:
-  - sysflow-scc
-  resources:
-  - securitycontextconstraints
-  verbs:
-  - use
+helm uninstall sf-processsor-chart -n sysflow

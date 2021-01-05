@@ -67,4 +67,8 @@ else
     echo "Namespace 'sysflow' created successfully"
 fi
 
+# sf-deployments/helm/scripts/
+REALPATH=$(dirname $(realpath $0))
+cd $REALPATH/charts
+
 helm install sf-exporter-chart -f sf-exporter-chart/values.yaml --namespace sysflow --set sfexporter.s3AccessKey=$s3AccessKey --set sfexporter.s3SecretKey=$s3SecretKey --set sfexporter.s3Endpoint=$s3Endpoint --set sfexporter.s3Location=$s3Region --set sfexporter.s3Bucket=$s3Bucket --debug ./sf-exporter-chart
