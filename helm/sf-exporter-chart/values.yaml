@@ -17,7 +17,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Template values for sf-exporter-chart.
+# Template values for sysflowagent.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -47,21 +47,19 @@ sfcollector:
   # enable drop mode removes syscalls inside the kernel before they are passed up to the collector
   # results in much better performance, less drops, but does remove mmaps from output
   dropMode: false
-  # filters out any descriptor that is not a file, including usenix sockets and pipes
+  # filters out any descriptor that is not a file, including unix sockets and pipes
   fileOnly: false
   # enables the creation of process flows
   procFlow: false
-  #sets mode for reads: "0" enables recording all file reads as flows.  "1" disables all file reads.
-  # "2" disables recording file reads to noisy directories: "/proc/", "/dev/",   "/sys/",     "//sys/",
-  #  "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
+  # sets mode for reads: "0" enables recording all file reads as flows.  "1" disables all file reads.
+  # "2" disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",
+  # "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
   readMode: "0"
-  # enable ebpf mode - required for minikube
+  # enables ebpf probe (required for minikube)
   ebpf: false
-  # mount etc directory in container - required for minikube and Google COS
+  # mounts /etc directory in container (required for minikube and Google COS)
   mountEtc:  false
 
-
-  
 # sysflow exporter parameters
 sfexporter:
   # Comment out if you always want to pull images 

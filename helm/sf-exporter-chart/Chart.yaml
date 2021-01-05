@@ -16,17 +16,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 apiVersion: v1
-appVersion: "1.0"
-description: A Helm chart to deploy SysFlow Telemetry pods across nodes in a cluster. 
-name: sf-exporter-chart
-version: 0.1-rc2
+name: sysflowagent
+description: |-
+  A Helm chart to deploy SysFlow on Kubernetes
+
+  Documentation
+  https://sysflow.readthedocs.io/en/latest/helm.html
+
+  License
+  Apache-2.0
 keywords:
-  - SysFlow
-  - Telemetry
-  - System Events
+- monitoring
+- security
+- alerting
+- telemetry
 maintainers:
-  - name:  SysFlow Team
-    email: sysflow@us.ibm.com
+- name: SysFlow Team
+  email: sysflow@us.ibm.com
 sources:
-  - https://github.com/sysflow-telemetry/
+- https://github.com/sysflow-telemetry/
+home: https://sysflow.readthedocs.io/
+icon: https://avatars3.githubusercontent.com/u/55713943?s=200&v=4
+sources:
+- https://github.com/sysflow-telemetry/
+home: https://sysflow.readthedocs.io/
+icon: https://avatars3.githubusercontent.com/u/55713943?s=200&v=4
+
+version: 0.1.0
+
+kubeVersion: '>=1.16.0'

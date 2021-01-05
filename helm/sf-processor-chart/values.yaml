@@ -1,3 +1,18 @@
+#
+# Copyright (C) 2020 IBM Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 # Default values for sysflowagent.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -29,19 +44,31 @@ resources:
     memory: 1024Mi
 
 sfcollector:
+  # Image repository
   repository: sysflowtelemetry/sf-collector
-  tag: edge
-  imagePullPolicy: Always
+  # Image tag
+  tag: latest
+  # Pull policy for image (Always|Never|IfNotPresent)
+  imagePullPolicy: IfNotPresent
+  # Filter expression
   filter: '"container.name!=sfprocessor and container.name!=sfcollector"'
+  # Interval in seconds to roll new trace files
   interval: 300
 
 sfprocessor:
+  # Image repository
   repository: sysflowtelemetry/sf-processor
-  tag: edge
-  imagePullPolicy: Always
-  export: terminal
+  # Image tag
+  tag: latest
+  # Pull policy for image (Always|Never|IfNotPresent)
+  imagePullPolicy: IfNotPresent
+  # Export type (terminal|file|syslog)  
+  export: syslog
+  # rsyslog host address
   syslogHost: localhost
+  # rsyslog port
   syslogPort: 514
+  # rsyslog proto
   syslogProto: tcp
 
 nodeSelector: {}
