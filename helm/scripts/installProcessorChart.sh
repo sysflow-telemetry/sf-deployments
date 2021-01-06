@@ -16,7 +16,7 @@
 
 if [ "$#" -ne 3 ]; then
     echo "Required arguments missing!"
-    echo "Usage : ./installSysflowAgent <rsyslog_ip> <rsyslog_port> <tcp|tls>"
+    echo "Usage : ./installAgent <rsyslog_host> <rsyslog_port> <tcp|tls>"
     exit 1
 fi
 

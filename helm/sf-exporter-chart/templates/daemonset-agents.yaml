@@ -26,20 +26,20 @@ apiVersion: apps/v1
 {{- end }}
 kind: DaemonSet
 metadata:
-  name: {{ template "sf-exporter-chart.fullname" . }}-agent
+  name: {{ template "sysflowagent.fullname" . }}
   labels:
-    app: {{ template "sf-exporter-chart.fullname" . }}
+    app: {{ template "sysflowagent.fullname" . }}
     chart: "{{ .Chart.Name }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
   selector:
     matchLabels:
-      app: {{ template "sf-exporter-chart.fullname" . }}
+      app: {{ template "sysflowagent.fullname" . }}
   template:
     metadata:
       labels:
-        app: {{ template "sf-exporter-chart.fullname" . }}
+        app: {{ template "sysflowagent.fullname" . }}
         chart: "{{ .Chart.Name }}"
         release: "{{ .Release.Name }}"
         tier: agent
@@ -235,7 +235,7 @@ spec:
       volumes:
       - name: secrets
         secret:
-          secretName: {{ template "sf-exporter-chart.fullname" . }}-secrets
+          secretName: {{ template "sysflowagent.fullname" . }}-secrets
           items:
           - key: s3_access_key
             path: "s3_access_key"
