@@ -29,6 +29,8 @@ Then, start your cluster:
 minikube start
 ```
 
+> Note: to install SysFlow on minikube, set `sfcollector.ebpf` and `sfcollector.mountEtc` to `true`.
+
 Check the [minikube docs](https://minikube.sigs.k8s.io/docs/start/) for additional installation options.
 
 > Tip: run `eval $(minikube docker-env)` to allow your Docker CLI to connect to minikube's Docker environment.
@@ -101,7 +103,7 @@ kubectl logs -f -c sfprocessor <podname>  -n sysflow
 
 To remove the SysFlow agent:
 ```
-./scripts/deleteAgent.sh
+./scripts/deleteChart.sh
 ```
 
 ### Advanced customizations
@@ -116,6 +118,8 @@ Below is the list of customizable attributes for the charts, organized by compon
 
 #### SysFlow Collector (sf-exporter-chart | sf-processor-chart)
 
+> Note: `sfcollector.dropMode` is set to `true` by default for performance considerations. If tracking `mmap` is required, set it to `false`.
+
 | parameter | description | default |
 |-|-|-|
 | sfcollector.imagepullpolicy | Pull policy for image (Always\|Never\|IfNotPresent) | IfNotPresent |
@@ -125,7 +129,7 @@ Below is the list of customizable attributes for the charts, organized by compon
 | sfcollector.outDir | Directory in which collector writes trace files | /mnt/data/ |
 | sfcollector.filter | Filter expression | "\"container.type!=host and container.name!=sfexporter and container.name!=sfcollector\"" |
 | sfcollector.criPath | Container runtime socket path.  Use this "/var/run/containerd/containerd.sock"if running containerd runtime.  Use "/var/run/crio/crio.sock" if running crio runtime. | "" |
-| sfcollector.dropMode | Drop mode filters syscalls in the kernel before they are passed up to the collector,  resulting in much better performance and fewer event drops. Note: It filters mmap  system calls from the event stream. | false |
+| sfcollector.dropMode | Drop mode filters syscalls in the kernel before they are passed up to the collector,  resulting in much better performance and fewer event drops. Note: It filters mmap  system calls from the event stream. | true |
 | sfcollector.fileOnly | Filters out any descriptor that is not a file, including unix sockets and pipes | false |
 | sfcollector.procFlow | Enables the creation of process flows | false |
 | sfcollector.readMode | Sets mode for reads: `0` enables recording all file reads as flows. `1` disables all file reads.   `2` disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",  "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/". | 0 |
@@ -145,8 +149,8 @@ Below is the list of customizable attributes for the charts, organized by compon
 | sfexporter.s3Port | S3 port | 9000 |
 | sfexporter.s3Bucket | S3 bucket where to push traces | "\<s3 bucket\>" |
 | sfexporter.s3Location | S3 location | "\<s3 region\>" |
-| sfexporter.s3AccessKey | S3 access key | "\<s3_access_key\>" |
-| sfexporter.s3SecretKey | S3 secret key | "\<s3_secret_key\>" |
+| sfexporter.s3AccessKey | S3 access key | "\<s3 access key\>" |
+| sfexporter.s3SecretKey | S3 secret key | "\<s3 secret key\>" |
 | sfexporter.s3Secure | S3 connection, `true` if TLS-enabled, `false` otherwise | false |
 
 #### SysFlow Processor (sf-processor-chart)

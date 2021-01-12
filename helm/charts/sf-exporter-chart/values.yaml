@@ -46,7 +46,7 @@ sfcollector:
   #criPath: "/var/run/crio/crio.sock"
   # enable drop mode removes syscalls inside the kernel before they are passed up to the collector
   # results in much better performance, less drops, but does remove mmaps from output
-  dropMode: false
+  dropMode: true
   # filters out any descriptor that is not a file, including unix sockets and pipes
   fileOnly: false
   # enables the creation of process flows
@@ -56,9 +56,9 @@ sfcollector:
   # "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
   readMode: "0"
   # enables ebpf probe (required for minikube)
-  ebpf: true
+  ebpf: false
   # mounts /etc directory in container (required for minikube and Google COS)
-  mountEtc: true
+  mountEtc: false
 
 # sysflow exporter parameters
 sfexporter:
