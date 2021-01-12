@@ -37,6 +37,8 @@ Check the [minikube docs](https://minikube.sigs.k8s.io/docs/start/) for addition
 
 The recommended driver for minikube is VirtualBox. Check the [VirtualBox docs](https://www.virtualbox.org/wiki/Downloads) for installation instructions for your environment.
 
+> A note about Docker pull limits: If you run into an error when deploying SysFlow on minikube, check the logs to see if it's related to the Docker pull limit being reached. It most likely is. To work around this inconvenience, connect to Minikube's Docker environment (see above), log into Docker with `docker login` command, and pull the desired images manually, before installing the helm charts. Make sure the images pull policies are set to the default value `IfNotPresent`.
+
 ## Deploy SysFlow
 
 The SysFlow agent can be deployed in S3 (batch) or rsyslog (stream) export configurations.
