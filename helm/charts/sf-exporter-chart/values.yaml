@@ -31,7 +31,7 @@ sfcollector:
   # image repository
   repository: sysflowtelemetry/sf-collector
   # image tag
-  tag: bpf
+  tag: latest
   # timeout in seconds to start roll a new trace files
   interval: 300
   # output directory, where traces are written to inside container

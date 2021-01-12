@@ -29,7 +29,7 @@ Then, start your cluster:
 minikube start
 ```
 
-> Note: to install SysFlow on minikube, set `sfcollector.ebpf` and `sfcollector.mountEtc` to `true`.
+> Note: to install SysFlow on minikube, set `sfcollector.ebpf` and `sfcollector.mountEtc` to `true` and change `sfcollector.tag` to `bpf`. 
 
 Check the [minikube docs](https://minikube.sigs.k8s.io/docs/start/) for additional installation options.
 
@@ -110,6 +110,8 @@ To remove the SysFlow agent:
 
 Most of the defaults should work out of the box. The collector is currently set to rotating files in 5 min intervals (or 300 seconds). CGroup resource limits can be set on the collector, exporter, and processor to limit resource usage. These can be adjusted depending on requirements and resources limitations.
 
+> Note: `sfcollector.dropMode` is set to `true` by default for performance considerations. If tracking `mmap` is required, set it to `false`.
+
 Kubernetes can use different container runtimes. Older versions used the docker runtime; however, newer versions typically run either containerd or crio.  It's important to know which runtime you have if you want to get the full benefits of SysFlow. You tell the collector which runtime you are using based on the sock file you refer to in the `criPath` variable. If you are using the `docker` runtime, leave `criPath` blank. If you are using containerd, set `criPath` to "/var/run/containerd/containerd.sock" and if you are using crio, set `criPath` to "/var/run/crio/crio.sock". If SysFlow files are empty or the container name variable is set to `incomplete` in SysFlow traces, this typically means that the runtime socket is not connected properly.
 
 > Note: the installation script installs the pods into a K8s namespace called `sysflow`.
@@ -117,8 +119,6 @@ Kubernetes can use different container runtimes. Older versions used the docker 
 Below is the list of customizable attributes for the charts, organized by component.
 
 #### SysFlow Collector (sf-exporter-chart | sf-processor-chart)
-
-> Note: `sfcollector.dropMode` is set to `true` by default for performance considerations. If tracking `mmap` is required, set it to `false`.
 
 | parameter | description | default |
 |-|-|-|
