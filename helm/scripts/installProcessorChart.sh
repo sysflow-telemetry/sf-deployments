@@ -46,6 +46,6 @@ fi
 
 # sf-deployments/helm/scripts/
 REALPATH=$(dirname $(realpath $0))
-cd $REALPATH/charts
+cd $REALPATH/../charts
 
-helm install sf-processor-chart -f sf-processor-chart/values.yaml --namespace $NAMESPACE --set sfprocessor.export=syslog --set sfprocessor.syslogHost=$RSYSLOG_IP --set sfprocessor.syslogPort=$RSYSLOG_PORT --set sfprocessor.syslogProto=$RSYSLOG_PROTO --debug ./sf-processor-chart
+helm install sysflowagent ./sf-processor-chart -f sf-processor-chart/values.yaml --namespace $NAMESPACE --set sfprocessor.export=syslog --set sfprocessor.syslogHost=$RSYSLOG_IP --set sfprocessor.syslogPort=$RSYSLOG_PORT --set sfprocessor.syslogProto=$RSYSLOG_PROTO --debug

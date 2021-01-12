@@ -31,7 +31,7 @@ sfcollector:
   # image repository
   repository: sysflowtelemetry/sf-collector
   # image tag
-  tag: latest
+  tag: bpf
   # timeout in seconds to start roll a new trace files
   interval: 300
   # output directory, where traces are written to inside container
@@ -56,9 +56,9 @@ sfcollector:
   # "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
   readMode: "0"
   # enables ebpf probe (required for minikube)
-  ebpf: false
+  ebpf: true
   # mounts /etc directory in container (required for minikube and Google COS)
-  mountEtc:  false
+  mountEtc: true
 
 # sysflow exporter parameters
 sfexporter:
@@ -67,7 +67,7 @@ sfexporter:
   # image repository
   repository: sysflowtelemetry/sf-exporter
   # image tag
-  tag: latest
+  tag: edge
   # export inverval
   interval: 30
   # directory where traces are read from inside container
@@ -87,8 +87,8 @@ sfexporter:
   # object store connection, 'true' if TLS-enabled, 'false' otherwise
   s3Secure: "false"
 
-nameOverride: "sfexporter"
-fullnameOverride: ""
+#nameOverride: "sfexporter"
+#fullnameOverride: ""
 tmpfsSize: 500Mi # size of tmpfs shared volume between collector and exporter (where traces are written)
 
 ## @param resources - object - optional

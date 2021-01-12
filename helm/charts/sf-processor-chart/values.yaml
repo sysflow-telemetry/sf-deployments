@@ -44,24 +44,43 @@ resources:
     memory: 1024Mi
 
 sfcollector:
+  # Pull policy for image (Always|Never|IfNotPresent)
+  imagepullpolicy: IfNotPresent
   # Image repository
   repository: sysflowtelemetry/sf-collector
   # Image tag
-  tag: latest
-  # Pull policy for image (Always|Never|IfNotPresent)
-  imagePullPolicy: IfNotPresent
+  tag: bpf
   # Filter expression
-  filter: '"container.name!=sfprocessor and container.name!=sfcollector"'
-  # Interval in seconds to roll new trace files
-  interval: 300
+  filter: '"container.type!=host and container.name!=sfprocessor and container.name!=sfcollector"'
+  # Use this criPath if running docker runtime
+  criPath: ""
+  # Use this criPath if running containerd runtime
+  #criPath: "/var/run/containerd/containerd.sock"
+  # Use this criPath if running crio runtime
+  #criPath: "/var/run/crio/crio.sock"
+  # enable drop mode removes syscalls inside the kernel before they are passed up to the collector
+  # results in much better performance, less drops, but does remove mmaps from output
+  dropMode: false
+  # filters out any descriptor that is not a file, including unix sockets and pipes
+  fileOnly: false
+  # enables the creation of process flows
+  procFlow: false
+  # sets mode for reads: "0" enables recording all file reads as flows.  "1" disables all file reads.
+  # "2" disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",
+  # "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
+  readMode: "0"
+  # enables ebpf probe (required for minikube)
+  ebpf: true
+  # mounts /etc directory in container (required for minikube and Google COS)
+  mountEtc: true
 
 sfprocessor:
+  # Comment out if you always want to pull images
+  imagepullpolicy: IfNotPresent
   # Image repository
   repository: sysflowtelemetry/sf-processor
   # Image tag
   tag: latest
-  # Pull policy for image (Always|Never|IfNotPresent)
-  imagePullPolicy: IfNotPresent
   # Export type (terminal|file|syslog)  
   export: syslog
   # rsyslog host address
