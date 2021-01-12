@@ -49,7 +49,7 @@ sfcollector:
   # Image repository
   repository: sysflowtelemetry/sf-collector
   # Image tag
-  tag: bpf
+  tag: latest
   # Filter expression
   filter: '"container.type!=host and container.name!=sfprocessor and container.name!=sfcollector"'
   # Use this criPath if running docker runtime
