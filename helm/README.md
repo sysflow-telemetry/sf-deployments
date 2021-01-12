@@ -29,7 +29,7 @@ Then, start your cluster:
 minikube start
 ```
 
-> Note: to install SysFlow on minikube, set `sfcollector.ebpf` and `sfcollector.mountEtc` to `true` and change `sfcollector.tag` to `bpf`. 
+> Note: to install SysFlow on minikube, set `sfcollector.ebpf` and `sfcollector.mountEtc` to `true` and change `sfcollector.tag` to `bpf` in `values.yaml` located inside each chart. 
 
 Check the [minikube docs](https://minikube.sigs.k8s.io/docs/start/) for additional installation options.
 
@@ -59,7 +59,7 @@ Installation scripts are provided to make installation easier. These scripts set
 To deploy the SysFlow agent with S3 export:
 
 ```
-./scripts/installAgent.sh s3 <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint>
+./scripts/installExporterChart.sh <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint> <s3_bucket>
 ```
 
 ### Installing the SysFlow agent with rsyslog exporter
@@ -76,7 +76,7 @@ This chart is located in `charts/sf-processor-chart`, which deploys the SysFlow 
 To deploy the SysFlow agent with rsyslog export:
 
 ```
-./scripts/installAgent.sh syslog <syslog_host> <syslog_port> <syslog_proto>
+./scripts/installProcessorChart.sh <syslog_host> <syslog_port> <syslog_proto>
 ```
 
 ### Checking installation
@@ -118,7 +118,7 @@ Kubernetes can use different container runtimes. Older versions used the docker 
 
 > Note: the installation script installs the pods into a K8s namespace called `sysflow`.
 
-Below is the list of customizable attributes for the charts, organized by component.
+Below is the list of customizable attributes for the charts, organized by component. These can be modified directly into the `values.yaml` located in each chart's directory. They can also be set directly into the helm command invoked by our installation scripts through `--set <attribute>=<value>` parameters.
 
 #### SysFlow Collector (sf-exporter-chart | sf-processor-chart)
 
