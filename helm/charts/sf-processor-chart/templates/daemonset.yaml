@@ -1,3 +1,18 @@
+#
+# Copyright (C) 2020 IBM Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -94,6 +109,32 @@ spec:
           value: ""
         - name: CRI_TIMEOUT
           value: "5"
+        {{- if .Values.sfcollector.ebpf }}
+        - name: SYSDIG_BPF_PROBE
+          value: ""
+        {{- end }}
+        {{- if .Values.sfcollector.dropMode }}
+        - name: ENABLE_DROP_MODE
+          value: "1"
+        {{- end }}
+        {{- if .Values.sfcollector.fileOnly }}
+        - name: FILE_ONLY
+          value: "1"
+        {{- end }}
+        {{- if .Values.sfcollector.procFlow }}
+        - name: ENABLE_PROC_FLOW
+          value: "1"
+        {{- end }}
+        {{- if eq .Values.sfcollector.readMode "1" }}
+        - name: FILE_READ_MODE
+          value: "1"
+        {{- else if eq .Values.sfcollector.readMode "2" }}
+        - name: FILE_READ_MODE
+          value: "2"
+        {{- else }}
+        - name: FILE_READ_MODE
+          value: "0"
+        {{- end }}
         - name: NODE_NAME
           valueFrom:
             fieldRef:
@@ -154,6 +195,11 @@ spec:
         - mountPath: /host/usr
           name: usr
           readOnly: true
+        {{- if (and .Values.sfcollector.ebpf .Values.sfcollector.mountEtc) }}
+        - mountPath: /host/etc
+          name: etc-fs
+          readOnly: true
+        {{- end }}
         securityContext:
           allowPrivilegeEscalation: true
           privileged: true
@@ -164,19 +210,16 @@ spec:
           runAsNonRoot: false
           runAsUser: 0
       volumes:
-#     - name: secrets
-#       secret:
-#         secretName: {{ template "sysflowagent.fullname" . }}
-#         items:
-#         - key: s3_access_key
-#           path: "s3_access_key"
-#       - key: s3_secret_key
-#         path: "s3_secret_key"
       - name: sysflowsock
         emptyDir: {}
       - name: dockersock
         hostPath:
           path: /var/run/docker.sock
+      {{- if (and .Values.sfcollector.ebpf .Values.sfcollector.mountEtc) }}
+      - name: etc-fs
+        hostPath:
+          path: /etc
+      {{- end }}
       - name: varrun-vol-crio
         hostPath:
           path: /var/run/crio

@@ -1,9 +1,6 @@
+#!/bin/bash
 #
-# Copyright (C) 2019 IBM Corporation.
-#
-# Authors:
-# Frederico Araujo <frederico.araujo@ibm.com>
-# Teryl Taylor <terylt@ibm.com>
+# Copyright (C) 2020 IBM Corporation.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,17 +13,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-apiVersion: v1
-appVersion: "1.0"
-description: A Helm chart to deploy SysFlow Telemetry pods across nodes in a cluster. 
-name: sf-exporter-chart
-version: 0.1-rc2
-keywords:
-  - SysFlow
-  - Telemetry
-  - System Events
-maintainers:
-  - name:  SysFlow Team
-    email: sysflow@us.ibm.com
-sources:
-  - https://github.com/sysflow-telemetry/
+helm uninstall sysflowagent -n sysflow

@@ -1,10 +1,5 @@
-#!/bin/bash
 #
-# Copyright (C) 2019 IBM Corporation.
-#
-# Authors:
-# Frederico Araujo <frederico.araujo@ibm.com>
-# Teryl Taylor <terylt@ibm.com>
+# Copyright (C) 2020 IBM Corporation.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,4 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-helm uninstall sf-exporter-chart -n sysflow
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sysflow-agent
+  labels:
+    {{- include "sysflowagent.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - sysflow-scc
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use

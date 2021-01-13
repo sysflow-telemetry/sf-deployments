@@ -19,13 +19,14 @@
 # limitations under the License.
 
 
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
     echo "Required arguments missing!"
     echo "Usage : ./installExporterChart <s3_region> <s3_access_key> <s3_secret_key> <s3_endpoint>"
     echo "<s3_region> value is the region in the S3 compliant object store (e.g., us-south)"
     echo "<s3_access_key> is the access key present in S3 compliant service credentials"
     echo "<s3_secret_key> is the secret key present in S3 compliant service credentials"
     echo "<s3_endpoint> is the address of the S3 compliant object store (e.g., s3.us-south.cloud-object-storage.appdomain.cloud)"
+    echo "<s3_bucket> is the bucket object store (e.g., sysflow)"
     exit 1
 fi
 
@@ -33,6 +34,7 @@ s3Region=$1
 s3AccessKey=$2
 s3SecretKey=$3
 s3Endpoint=$4
+s3Bucket=$5
 
 # Don't run if any of the prerequisites are not installed.
 prerequisites=( "kubectl" "helm" )
@@ -65,4 +67,8 @@ else
     echo "Namespace 'sysflow' created successfully"
 fi
 
-helm install sf-exporter-chart -f sf-exporter-chart/values.yaml --namespace sysflow --set sfexporter.s3AccessKey=$s3AccessKey --set sfexporter.s3SecretKey=$s3SecretKey --set sfexporter.s3Endpoint=$s3Endpoint --set sfexporter.s3Location=$s3Region --debug ./sf-exporter-chart
+# sf-deployments/helm/scripts/
+REALPATH=$(dirname $(realpath $0))
+cd $REALPATH/../charts
+
+helm install sysflowagent ./sf-exporter-chart -f sf-exporter-chart/values.yaml --namespace sysflow --set sfexporter.s3AccessKey=$s3AccessKey --set sfexporter.s3SecretKey=$s3SecretKey --set sfexporter.s3Endpoint=$s3Endpoint --set sfexporter.s3Location=$s3Region --set sfexporter.s3Bucket=$s3Bucket --debug

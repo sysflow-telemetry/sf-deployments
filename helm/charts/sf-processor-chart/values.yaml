@@ -1,0 +1,102 @@
+#
+# Copyright (C) 2020 IBM Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Default values for sysflowagent.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# podSecurityContext:
+  # fsGroup: 2000
+
+# securityContext:
+#   capabilities:
+#     drop:
+#     - ALL
+#   readOnlyRootFilesystem: true
+#   runAsNonRoot: true
+#   runAsUser: 1001
+
+livenessProbe:
+  exec:
+    command: [ "test", "-e", "/sock/sysflow.sock" ]
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 3
+
+resources:
+  requests:
+    cpu: 600m
+    memory: 256Mi
+  limits:
+    cpu: 2000m
+    memory: 1024Mi
+
+sfcollector:
+  # Pull policy for image (Always|Never|IfNotPresent)
+  imagepullpolicy: IfNotPresent
+  # Image repository
+  repository: sysflowtelemetry/sf-collector
+  # Image tag
+  tag: latest
+  # Filter expression
+  filter: '"container.type!=host and container.name!=sfprocessor and container.name!=sfcollector"'
+  # Use this criPath if running docker runtime
+  criPath: ""
+  # Use this criPath if running containerd runtime
+  #criPath: "/var/run/containerd/containerd.sock"
+  # Use this criPath if running crio runtime
+  #criPath: "/var/run/crio/crio.sock"
+  # enable drop mode removes syscalls inside the kernel before they are passed up to the collector
+  # results in much better performance, less drops, but does remove mmaps from output
+  dropMode: true
+  # filters out any descriptor that is not a file, including unix sockets and pipes
+  fileOnly: false
+  # enables the creation of process flows
+  procFlow: false
+  # sets mode for reads: "0" enables recording all file reads as flows.  "1" disables all file reads.
+  # "2" disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",
+  # "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
+  readMode: "0"
+  # enables ebpf probe (required for minikube)
+  ebpf: false
+  # mounts /etc directory in container (required for minikube and Google COS)
+  mountEtc: false
+
+sfprocessor:
+  # Comment out if you always want to pull images
+  imagepullpolicy: IfNotPresent
+  # Image repository
+  repository: sysflowtelemetry/sf-processor
+  # Image tag
+  tag: latest
+  # Export type (terminal|file|syslog)  
+  export: syslog
+  # rsyslog host address
+  syslogHost: localhost
+  # rsyslog port
+  syslogPort: 514
+  # rsyslog proto
+  syslogProto: tcp
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+          - {key: kubernetes.io/arch, operator: In, values: [amd64]}
