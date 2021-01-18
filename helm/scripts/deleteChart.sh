@@ -1,9 +1,6 @@
+#!/bin/bash
 #
-# Copyright (C) 2019 IBM Corporation.
-#
-# Authors:
-# Frederico Araujo <frederico.araujo@ibm.com>
-# Teryl Taylor <terylt@ibm.com>
+# Copyright (C) 2020 IBM Corporation.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,15 +13,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: sfexporterchart-secrets
-  labels:
-    app: sfexporterchart-secrets
-type: Opaque
-data:
-  # To base64 key do: echo -n <key> | base64       
-  s3_access_key:  <b64 encoded s3 access key>
-  s3_secret_key:  <b64 encoded s3 secret key>
+helm uninstall sysflowagent -n sysflow

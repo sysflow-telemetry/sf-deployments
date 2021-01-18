@@ -1,9 +1,5 @@
 #
-# Copyright (C) 2019 IBM Corporation.
-#
-# Authors:
-# Frederico Araujo <frederico.araujo@ibm.com>
-# Teryl Taylor <terylt@ibm.com>
+# Copyright (C) 2020 IBM Corporation.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,16 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: v1
-kind: Secret
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
 metadata:
-  name: {{ template "sf-exporter-chart.fullname" . }}-secrets
+  name: sysflow-agent
   labels:
-    app: {{ template "sf-exporter-chart.fullname" . }}
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
-type: Opaque
-data:
-  s3_access_key:  {{ .Values.sfexporter.s3AccessKey | b64enc | quote }}
-  s3_secret_key:  {{ .Values.sfexporter.s3SecretKey | b64enc | quote }}
+    {{- include "sysflowagent.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - sysflow-scc
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
