@@ -194,3 +194,14 @@ sysprint /mnt/data/tests/client-server/tcp-client-server.sf
 ```
 
 > Tip: other samples can be found in the tests directory
+
+## Analyzing collected traces
+
+A [Jupyter environment](https://hub.docker.com/r/sysflowtelemetry/sfnb) is also available for inspecting and implementing analytic notebooks on collected SysFlow data. It includes APIs for data manipulation using Pandas dataframes and a native query language (`sfql`) with macro support. To start it locally with example notebooks, run:
+
+```bash
+git clone https://github.com/sysflow-telemetry/sf-apis.git && cd sf-apis
+docker run --rm -d --name sfnb --user $(id -u):$(id -g) --group-add users -v $(pwd)/pynb:/home/jovyan/work -p 8888:8888 sysflowtelemetry/sfnb
+```
+
+Then, open a web browser and point it to `http://localhost:8888` (alternatively, the remote server name or IP where the notebook is hosted). To obtain the notebook authentication token, run `docker logs sfnb`.
