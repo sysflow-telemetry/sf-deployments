@@ -26,16 +26,39 @@ services:
       - s3_secret_key
     volumes:
       - /mnt/data:/mnt/data
-    environment:
-      S3_ENDPOINT: minio # replace with remote ip if using external object store 
-      S3_PORT: 9000
-      S3_LOCATION: local
-      S3_BUCKET: sysflow
-      SECURE: "false"
+    environment:      
       INTERVAL: 120
-      NODE_IP: localhost
+      # S3_ENDPOINT: ${S3_ENDPOINT}
+      # S3_PORT: ${S3_PORT}
+      # S3_LOCATION: ${S3_LOCATION}
+      # S3_BUCKET: ${S3_BUCKET}
+      # SECURE: ${S3_SECURE}
+      # NODE_IP: ${NODE_IP}      
     depends_on:
       - sf-collector
+  sf-collector:
+    container_name: sf-collector
+    image: sysflowtelemetry/sf-collector:latest
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock 
+      - /dev:/host/dev 
+      - /proc:/host/proc:ro 
+      - /boot:/host/boot:ro 
+      - /lib/modules:/host/lib/modules:ro 
+      - /usr:/host/usr:ro
+      - /mnt/data:/mnt/data
+    environment:      
+      FILTER: "container.name!=sf-collector and container.name!=sf-exporter" 
+      INTERVAL: 60 
+      OUTPUT: /mnt/data/ # trace files directory prefix
+      ENABLE_DROP_MODE: 1 # '0' disabled, '1' enabled
+      ENABLE_PROC_FLOW: 0 # '0' disabled, '1' enables the creation of process flows
+      FILE_ONLY: 0 # '0' disabled, '1' filters out any descriptor that is not a file, including unix sockets and pipes
+      FILE_READ_MODE: 0 # '0' include all file reads, '1' disables all reads to any file, '2' disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",  "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
+      # EXPORTER_ID: ${EXPORTER_ID}
+      # NODE_IP: ${NODE_IP}
+      # SYSDIG_BPF_PROBE: "" # uncomment to enable bpf probe
 secrets:
   s3_access_key:
     file: ./secrets/access_key
