@@ -32,7 +32,7 @@ yum -y install kernel-devel-$(uname -r)
 Clone this repository and change directory as follows:
 
 ```bash
-git clone git@github.com:sysflow-telemetry/sf-deployments.git
+git clone https://github.com/sysflow-telemetry/sf-deployments.git
 cd sf-deployments/docker
 ```
 
