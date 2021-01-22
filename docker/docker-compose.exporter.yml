@@ -26,16 +26,28 @@ services:
       - s3_secret_key
     volumes:
       - /mnt/data:/mnt/data
-    environment:
-      S3_ENDPOINT: minio # replace with remote ip if using external object store 
-      S3_PORT: 9000
-      S3_LOCATION: local
-      S3_BUCKET: sysflow
-      SECURE: "false"
-      INTERVAL: 120
-      NODE_IP: localhost
+    environment:      
+      INTERVAL: 30
+    env_file:
+      - ./config/.env.exporter   
     depends_on:
       - sf-collector
+  sf-collector:
+    container_name: sf-collector
+    image: sysflowtelemetry/sf-collector:latest
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock 
+      - /dev:/host/dev 
+      - /proc:/host/proc:ro 
+      - /boot:/host/boot:ro 
+      - /lib/modules:/host/lib/modules:ro 
+      - /usr:/host/usr:ro
+      - /mnt/data:/mnt/data
+    environment:            
+      OUTPUT: /mnt/data/ # trace files directory prefix
+    env_file:
+      - ./config/.env.collector
 secrets:
   s3_access_key:
     file: ./secrets/access_key

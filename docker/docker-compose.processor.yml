@@ -1,0 +1,41 @@
+#
+# Copyright (C) 2020 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+#
+version: "3.5"
+services:
+  sf-processor:
+    container_name: sf-processor
+    image: sysflowtelemetry/sf-processor:latest    
+    volumes:
+      - socket-vol:/sock/
+    environment:
+      DRIVER: socket
+      INPUT_PATH: /sock/sysflow.sock
+    env_file:
+      - ./config/.env.processor
+  sf-collector:
+    container_name: sf-collector
+    image: sysflowtelemetry/sf-collector:latest
+    depends_on:
+      - "sf-processor"
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock 
+      - /dev:/host/dev 
+      - /proc:/host/proc:ro 
+      - /boot:/host/boot:ro 
+      - /lib/modules:/host/lib/modules:ro 
+      - /usr:/host/usr:ro
+      - /mnt/data:/mnt/data
+      - socket-vol:/sock/      
+    environment:            
+      SOCK_FILE: /sock/sysflow.sock  
+    env_file:
+      - ./config/.env.collector
+            
+volumes:
+  socket-vol:
