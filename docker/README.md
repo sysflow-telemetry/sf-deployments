@@ -76,16 +76,16 @@ To start the telemetry stack:
 docker-compose -f docker-compose.exporter.yml up
 ```
 
-To start the telemetry stack with a local minio object store:
-
-```bash
-docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml up
-```
-
 To stop the telemetry stack:
 
 ```bash
 docker-compose -f docker-compose.exporter.yml down
+```
+
+To start the telemetry stack with a local minio object store:
+
+```bash
+docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml up
 ```
 
 To stop the local minio instance and the telemetry stack:
