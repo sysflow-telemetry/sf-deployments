@@ -1,4 +1,4 @@
-# Docker
+# Docker Compose
 
 This repository contains utility scripts to deploy a docker telemetry stack. 
 
