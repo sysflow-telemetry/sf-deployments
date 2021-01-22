@@ -30,8 +30,8 @@ services:
       - /lib/modules:/host/lib/modules:ro 
       - /usr:/host/usr:ro
       - /mnt/data:/mnt/data
-    environment:
-      EXPORTER_ID: local
-      FILTER: "\"container.name!=sf-collector and container.name!=sf-exporter\"" 
-      INTERVAL: 60 
-      OUTPUT: /mnt/data/ # trace files directory prefix
+    environment:                   
+      OUTPUT: /mnt/data/ # trace files directory prefix      
+    env_file:
+      - ./config/.env.collector
+
