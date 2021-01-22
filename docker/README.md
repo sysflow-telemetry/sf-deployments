@@ -1,12 +1,6 @@
 # Docker
 
-## Introduction
-
-This repository contains utility scripts to deploy a docker telemetry stack.
-
-### Deployment
-
-Three deployment configurations are described below: _local_ (collector-only), _S3_ (batch) export mode, and _rsyslog_ (stream) export mode. The local deployment stores collected traces on the local filesystem and the full stack deployments export the collected traces to a S3-compatible object storage server or streams SysFlow records to remote syslog server.
+This repository contains utility scripts to deploy a docker telemetry stack. Three deployment configurations are described below: _local_ (collector-only), _S3_ (batch) export mode, and _rsyslog_ (stream) export mode. The local deployment stores collected traces on the local filesystem and the full stack deployments export the collected traces to a S3-compatible object storage server or streams SysFlow records to remote syslog server.
 
 ### Pre-requisites
 
