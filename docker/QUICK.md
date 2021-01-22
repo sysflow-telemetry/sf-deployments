@@ -26,14 +26,12 @@ The SysFlow agent can be deployed in S3 (batch) or rsyslog (edge processing) exp
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Exporter.png" width="45%" height="45%" />
-    <figcaption>SysFlow agent deployed with telemetry data exported to S3-compliant object storage.</figcaption>
 </center>
 
 In edge processing configuration, SysFlow exports the collected telemetry as events streamed to a rsyslog collector. This deployment enables the creation of customized edge pipelines, and offers a built-in policy engine to filter, enrich, and alert on SysFlow records.
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />
-    <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption>
 </center>
 
 Instructions for `Docker Compose`, `Helm`, and `OpenShift` deployments of complete SysFlow stacks are available [here](https://sysflow.readthedocs.io/en/latest/deploy.html).
