@@ -159,7 +159,7 @@ sysprint -i s3 -c <s3_endpoint> -a <s3_access_key> -s <s3_secret_key> <bucket_na
 
 > Tip: see all options of the `sysprint` utility with `-h` option.
 
-## Inspect example traces
+### Inspect example traces
 
 Sample trace files are provided in `tests`. Copy them into `/mnt/data` to inspect inside sysprint's environment.
 
