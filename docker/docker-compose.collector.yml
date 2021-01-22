@@ -30,14 +30,12 @@ services:
       - /lib/modules:/host/lib/modules:ro 
       - /usr:/host/usr:ro
       - /mnt/data:/mnt/data
-    environment:
-      EXPORTER_ID: ${EXPORTER_ID}
-      NODE_IP: ${NODE_IP}
-      FILTER: "\"container.name!=sf-collector and container.name!=sf-exporter\"" 
-      INTERVAL: 60 
+    environment:                   
       OUTPUT: /mnt/data/ # trace files directory prefix
-      ENABLE_DROP_MODE: 1 # '0' disabled, '1' enabled
-      ENABLE_PROC_FLOW: 0 # '0' disabled, '1' enables the creation of process flows
-      FILE_ONLY: 0 # '0' disabled, '1' filters out any descriptor that is not a file, including unix sockets and pipes
-      FILE_READ_MODE: 0 # '0' include all file reads, '1' disables all reads to any file, '2' disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",  "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
-      #SYSDIG_BPF_PROBE: "" # uncomment to enable bpf probe
+      # ENABLE_DROP_MODE: 1 # '0' disabled, '1' enabled
+      # ENABLE_PROC_FLOW: 0 # '0' disabled, '1' enables the creation of process flows
+      # FILE_ONLY: 0 # '0' disabled, '1' filters out any descriptor that is not a file, including unix sockets and pipes
+      # FILE_READ_MODE: 0 # '0' include all file reads, '1' disables all reads to any file, '2' disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",  "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
+    env_file:
+      - ./config/.env.collector
+

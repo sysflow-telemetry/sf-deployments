@@ -47,7 +47,9 @@ Start the telemetry probe, which will be ran in a container.
 > Tip: add container.type!=host to `FILTER` string located inside this script to filter out host (non-containerized) events.
 
 ```bash
-docker-compose -f docker-compose.collector.yml up
+docker-compose -f docker-compose.collector.yml 
+               -e EXPORTER\_ID=<hostname|any other name>
+               -e NODE\_IP=<host IP> up
 ```
 
 ### Stop the collection probe
