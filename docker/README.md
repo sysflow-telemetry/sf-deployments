@@ -2,7 +2,7 @@
 
 This repository contains utility scripts to deploy a docker telemetry stack. Three deployment configurations are described below: _local_ (collector-only), _S3_ (batch) export mode, and _rsyslog_ (stream) export mode. The local deployment stores collected traces on the local filesystem and the full stack deployments export the collected traces to a S3-compatible object storage server or streams SysFlow records to remote syslog server.
 
-### Pre-requisites
+## Pre-requisites
 
 - Docker ([installing Docker](https://docs.docker.com/engine/install/))
 - Docker Compose ([installing Compose](https://docs.docker.com/compose/install/))
@@ -21,7 +21,7 @@ Or, on RHEL-like distributions:
 yum -y install kernel-devel-$(uname -r)
 ```
 
-### Setup
+## Setup
 
 Clone this repository and change directory as follows:
 
@@ -30,7 +30,7 @@ git clone https://github.com/sysflow-telemetry/sf-deployments.git
 cd sf-deployments/docker
 ```
 
-## Local deployment: SysFlow collection probe only
+## Local collection probe only
 
 This deployment will install the Sysflow collection probe only, i.e., without an exporter to an external data store (e.g., S3). See below for the deploytment of the full telemetry stack.
 
