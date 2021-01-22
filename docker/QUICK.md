@@ -20,7 +20,23 @@ docker run -d --privileged --name sf-collector \
 ```
 where INTERVAL denotes the time in seconds before a new trace file is generated, EXPORTER\_ID sets the exporter name, OUTPUT is the directory in which trace files are written, and FILTER is the filter expression used to filter collected events. Note: append `container.type!=host` to FILTER expression to filter host events. 
 
-Instructions for `Docker Compose` and `Helm` deployments of complete SysFlow stacks are available [here](https://sysflow.readthedocs.io/en/latest/deploy.html).
+### Deployment options
+
+The SysFlow agent can be deployed in S3 (batch) or rsyslog (edge processing) export configurations. In the batch configuration, SysFlow exports the collected telemetry as trace files (batches of SysFlow records) to any S3-compliant object storage service.
+
+<center>
+    <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Exporter.png" width="45%" height="45%" />
+    <figcaption>SysFlow agent deployed with telemetry data exported to S3-compliant object storage.</figcaption>
+</center>
+
+In edge processing configuration, SysFlow exports the collected telemetry as events streamed to a rsyslog collector. This deployment enables the creation of customized edge pipelines, and offers a built-in policy engine to filter, enrich, and alert on SysFlow records.
+
+<center>
+    <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />
+    <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption>
+</center>
+
+Instructions for `Docker Compose`, `Helm`, and `OpenShift` deployments of complete SysFlow stacks are available [here](https://sysflow.readthedocs.io/en/latest/deploy.html).
 
 ### Inspecting collected traces
 

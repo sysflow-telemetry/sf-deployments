@@ -58,7 +58,7 @@ docker-compose -f docker-compose.collector.yml down
 
 ## S3 export deployment
 
-This deployment configuration includes the SysFlow Collector and S3 Exporter
+This deployment configuration includes the SysFlow Collector and S3 Exporter.
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Exporter.png" width="45%" height="45%" />
@@ -106,7 +106,7 @@ docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml down
 
 ## RSyslog export deployment with edge processing
 
-This deployment configuration includes the SysFlow Collector and Processor with rsyslog exporter
+This deployment configuration includes the SysFlow Collector and Processor with rsyslog exporter.
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />
