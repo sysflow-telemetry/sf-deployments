@@ -1,6 +1,6 @@
 # Docker
 
-This repository contains utility scripts to deploy a docker telemetry stack. Three deployment configurations are described below: _local_ (collector-only), _S3_ (batch) export mode, and _rsyslog_ (stream) export mode. The local deployment stores collected traces on the local filesystem and the full stack deployments export the collected traces to a S3-compatible object storage server or streams SysFlow records to remote syslog server.
+This repository contains utility scripts to deploy a docker telemetry stack. 
 
 ## Pre-requisites
 
@@ -21,7 +21,11 @@ Or, on RHEL-like distributions:
 yum -y install kernel-devel-$(uname -r)
 ```
 
-## Setup
+## Deploy SysFlow
+
+Three deployment configurations are described below: _local_ (collector-only), _S3_ (batch) export mode, and _rsyslog_ (stream) export mode. The local deployment stores collected traces on the local filesystem and the full stack deployments export the collected traces to a S3-compatible object storage server or streams SysFlow records to remote syslog server.
+
+### Setup
 
 Clone this repository and change directory as follows:
 
@@ -30,27 +34,25 @@ git clone https://github.com/sysflow-telemetry/sf-deployments.git
 cd sf-deployments/docker
 ```
 
-## Local collection probe only
+### Local collection probe only
 
 This deployment will install the Sysflow collection probe only, i.e., without an exporter to an external data store (e.g., S3). See below for the deploytment of the full telemetry stack.
 
-### Start the collection probe
-
-Start the telemetry probe, which will be ran in a container.
-
-> Tip: add container.type!=host to `FILTER` string located in `./config/.env.collector` to filter out host (non-containerized) events.
+To start the telemetry probe (collector only):
 
 ```bash
 docker-compose -f docker-compose.collector.yml up
 ```
 
-### Stop the collection probe
+> Tip: add container.type!=host to `FILTER` string located in `./config/.env.collector` to filter out host (non-containerized) events.
+
+To stop the collection probe:
 
 ```bash
 docker-compose -f docker-compose.collector.yml down
 ```
 
-## S3 export deployment
+### S3 export deployment
 
 This deployment configuration includes the SysFlow Collector and S3 Exporter.
 
@@ -59,18 +61,14 @@ This deployment configuration includes the SysFlow Collector and S3 Exporter.
     <figcaption>SysFlow agent deployed with telemetry data exported to S3-compliant object storage.</figcaption>
 </center>
 
-### Create docker secrets for S3 authentication
-
-Create the docker secrets used to connect to the S3 object store:
+First, create the docker secrets used to connect to the S3 object store:
 
 ```bash
 echo "<s3 access key>" > ./secrets/access_key
 echo "<s3 secret key>" > ./secrets/secret_key
 ```
 
-### Start the telemetry stack
-
-First, configure the S3 endpoint in the exporter settings (default values point to a local minio object store described below). Exporter configuration is located in `./config/.env.exporter`. Collector settings can be changed in `./config/.env.collector`. Additional settings can be configured directly in compose file.
+Then, configure the S3 endpoint in the exporter settings (default values point to a local minio object store described below). Exporter configuration is located in `./config/.env.exporter`. Collector settings can be changed in `./config/.env.collector`. Additional settings can be configured directly in compose file.
 
 To start the telemetry stack:
 
@@ -84,8 +82,6 @@ To start the telemetry stack with a local minio object store:
 docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml up
 ```
 
-### Stop telemetry stack
-
 To stop the telemetry stack:
 
 ```bash
@@ -98,7 +94,7 @@ To stop the local minio instance and the telemetry stack:
 docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml down
 ```
 
-## RSyslog export deployment with edge processing
+### RSyslog export deployment with edge processing
 
 This deployment configuration includes the SysFlow Collector and Processor with rsyslog exporter.
 
@@ -107,8 +103,6 @@ This deployment configuration includes the SysFlow Collector and Processor with 
     <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption>
 </center>
 
-### Start the telemetry stack
-
 First, configure the rsyslog endpoint in the processor settings. Processor configuration is located in `./config/.env.processor`. Collector settings can be changed in `./config/.env.collector`. Additional settings can be configured directly in compose file.
 
 To start the telemetry stack:
@@ -116,8 +110,6 @@ To start the telemetry stack:
 ```bash
 docker-compose -f docker-compose.processor.yml up                                
 ```
-
-### Stop telemetry stack
 
 To stop the telemetry stack:
 
