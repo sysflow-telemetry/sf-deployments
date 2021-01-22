@@ -44,12 +44,10 @@ This deployment will install the Sysflow collection probe only, i.e., without an
 
 Start the telemetry probe, which will be ran in a container.
 
-> Tip: add container.type!=host to `FILTER` string located inside this script to filter out host (non-containerized) events.
+> Tip: add container.type!=host to `FILTER` string located in `./config/.env.collector` to filter out host (non-containerized) events.
 
 ```bash
-docker-compose -f docker-compose.collector.yml 
-               -e EXPORTER\_ID=<hostname|any other name>
-               -e NODE\_IP=<host IP> up
+docker-compose -f docker-compose.collector.yml up
 ```
 
 ### Stop the collection probe
@@ -78,32 +76,18 @@ echo "<s3 secret key>" > ./secrets/secret_key
 
 ### Start the telemetry stack
 
+First, configure the S3 endpoint in the exporter settings (default values point to a local minio object store described below). Exporter configuration is located in `./config/.env.exporter`. Collector settings can be changed in `./config/.env.collector`. Additional settings can be configured directly in compose file.
+
 To start the telemetry stack:
 
-> Note: edit the compose file directly for additional settings.
-
 ```bash
-docker-compose -f docker-compose.exporter.yml 
-               -e EXPORTER\_ID=<hostname|any other name>
-               -e NODE\_IP=<host IP>
-               -e S3\_ENDPOINT=<S3 URL|IP> 
-               -e S3\_PORT=<S3 port> 
-               -e S3\_LOCATION=<S3 location> 
-               -e S3\_BUCKET=<S3 bucket> 
-               -e SECURE=<true|false> up
+docker-compose -f docker-compose.exporter.yml up
 ```
 
 To start the telemetry stack with a local minio object store:
 
 ```bash
-docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml 
-               -e EXPORTER\_ID=$HOSTNAME
-               -e NODE\_IP="localhost"
-               -e S3\_ENDPOINT="minio" 
-               -e S3\_PORT=9000
-               -e S3\_LOCATION="local" 
-               -e S3\_BUCKET="sysflow"
-               -e SECURE="false" up
+docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml up
 ```
 
 ### Stop telemetry stack
@@ -114,13 +98,13 @@ To stop the telemetry stack:
 docker-compose -f docker-compose.exporter.yml down
 ```
 
-To stop the local telemetry stack:
+To stop the local minio instance and the telemetry stack:
 
 ```bash
 docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml down
 ```
 
-## RSyslog export deployment with edge processing capabilities
+## RSyslog export deployment with edge processing
 
 This deployment configuration includes the SysFlow Collector and Processor with rsyslog exporter
 
@@ -131,18 +115,12 @@ This deployment configuration includes the SysFlow Collector and Processor with 
 
 ### Start the telemetry stack
 
+First, configure the rsyslog endpoint in the processor settings. Processor configuration is located in `./config/.env.processor`. Collector settings can be changed in `./config/.env.collector`. Additional settings can be configured directly in compose file.
+
 To start the telemetry stack:
 
-> Note: edit the compose file directly for additional settings.
-
 ```bash
-docker-compose -f docker-compose.processor.yml 
-               -e EXPORTER\_ID=<hostname|any other name>
-               -e NODE\_IP=<host IP>
-               -e EXPORTER\_SOURCE=<hostname|any other name> 
-               -e EXPORTER\_HOST=<rsyslog host IP> 
-               -e EXPORTER\_PORT=<rsyslog port (e.g., 514)> 
-               -e EXPORTER\_PROTO=<udp|tcp|tcp+tls (e.g., tcp)>                                
+docker-compose -f docker-compose.processor.yml up                                
 ```
 
 ### Stop telemetry stack
