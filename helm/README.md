@@ -67,8 +67,7 @@ To deploy the SysFlow agent with S3 export:
 In this configuration, SysFlow exports the collected telemetry as events streamed to a rsyslog collector. This deployment enables the creation of customized edge pipelines, and offers a built-in policy engine to filter, enrich, and alert on SysFlow records.
 
 <center>
-    <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />
-    <!-- <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption> -->
+    <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />    
 </center>
 
 This chart is located in `charts/sf-processor-chart`, which deploys the SysFlow Collector and Processor as a daemonset. The collector monitors the node, and streams SysFlow records to the processor, which executes a configurable edge analytic pipeline and export events to a rsyslog endpoint.

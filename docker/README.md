@@ -99,8 +99,7 @@ docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml down
 This deployment configuration includes the SysFlow Collector and Processor with rsyslog exporter.
 
 <center>
-    <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />
-    <!-- <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption> -->
+    <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />    
 </center>
 
 First, configure the rsyslog endpoint in the processor settings. Processor configuration is located in `./config/.env.processor`. Collector settings can be changed in `./config/.env.collector`. Additional settings can be configured directly in compose file.
