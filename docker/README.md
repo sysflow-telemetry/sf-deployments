@@ -1,4 +1,4 @@
-# Docker
+# Docker Compose
 
 This repository contains utility scripts to deploy a docker telemetry stack. 
 
@@ -58,7 +58,7 @@ This deployment configuration includes the SysFlow Collector and S3 Exporter.
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Exporter.png" width="45%" height="45%" />
-    <figcaption>SysFlow agent deployed with telemetry data exported to S3-compliant object storage.</figcaption>
+    <!-- <figcaption>SysFlow agent deployed with telemetry data exported to S3-compliant object storage.</figcaption> -->
 </center>
 
 First, create the docker secrets used to connect to the S3 object store:
@@ -100,7 +100,7 @@ This deployment configuration includes the SysFlow Collector and Processor with 
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />
-    <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption>
+    <!-- <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption> -->
 </center>
 
 First, configure the rsyslog endpoint in the processor settings. Processor configuration is located in `./config/.env.processor`. Collector settings can be changed in `./config/.env.collector`. Additional settings can be configured directly in compose file.
