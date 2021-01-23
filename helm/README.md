@@ -49,7 +49,7 @@ In this configuration, SysFlow exports the collected telemetry as trace files (b
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Exporter.png" width="45%" height="45%" />
-    <figcaption>SysFlow agent deployed with telemetry data exported to S3-compliant object storage.</figcaption>
+    <!-- <figcaption>SysFlow agent deployed with telemetry data exported to S3-compliant object storage.</figcaption> -->
 </center>
 
 This chart is located in `charts/sf-exporter-chart`, which deploys the SysFlow Collector and Exporter as a daemonset. The collector monitors the node, and writes trace files to a shared memory volume `/mnt/data` which the exporter manages and reads from to push completed traces to a S3-compliant object storage. The `/mnt/data/` is mapped to a tmpfs filesystem, and you can specify its size using the `tmpfsSize`.
@@ -68,7 +68,7 @@ In this configuration, SysFlow exports the collected telemetry as events streame
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />
-    <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption>
+    <!-- <figcaption>SysFlow agent deployed with telemetry data exported to a rsyslog collector.</figcaption> -->
 </center>
 
 This chart is located in `charts/sf-processor-chart`, which deploys the SysFlow Collector and Processor as a daemonset. The collector monitors the node, and streams SysFlow records to the processor, which executes a configurable edge analytic pipeline and export events to a rsyslog endpoint.
