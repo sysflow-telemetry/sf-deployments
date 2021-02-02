@@ -40,6 +40,36 @@ S3_ACCESS_KEY_ID=<your_acs_key> S3_SECRET_ACCESS_KEY=<your_sec_key> S3_HOSTNAME=
 
 For more details deploying the operator, please see the documentation [here](https://github.com/sysflow-telemetry/sf-deployments/tree/master/operator/OVERVIEW.md)
 
+# Running on RedHat OpenShift(OC) 4.6 Platform
+
+If you want to run on RedHat OpenShift 4.6, since RedHat has removed the kernel-devel package from the 4.6 RHCOS installations, you have to add the following machine config to let RHCOS install the kernel-devel package.
+
+The worker node machine config
+```
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: worker-extensions
+spec:
+  extensions:
+    - kernel-devel
+```
+
+The master node machine config
+```
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: master-extensions
+spec:
+  extensions:
+    - kernel-devel
+```
+
 # License
 
 View [license information](https://github.com/sysflow-telemetry/sf-deployments/tree/master/operator/LICENSE.md) for the software contained in this image.
