@@ -152,6 +152,9 @@ spec:
         - mountPath: /host/var/run
           name: varrun
           readOnly: false 
+        - mountPath: /host/run/containerd
+          name: vol-containerd
+          readOnly: false 
         {{- if (and .Values.sfcollector.ebpf .Values.sfcollector.mountEtc) }}
         - mountPath: /host/etc
           name: etc-fs
@@ -253,6 +256,9 @@ spec:
       - name: varrun
         hostPath:
           path: /var/run
+      - name: vol-containerd
+        hostPath:
+          path: /run/containerd
       - name: dev
         hostPath:
           path: /dev
