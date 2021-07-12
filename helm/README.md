@@ -43,6 +43,15 @@ The recommended driver for minikube is VirtualBox. Check the [VirtualBox docs](h
 
 The SysFlow agent can be deployed in S3 (batch) or rsyslog (stream) export configurations.
 
+### Setup
+
+Clone this repository and change directory as follows:
+
+```bash
+git clone https://github.com/sysflow-telemetry/sf-deployments.git
+cd sf-deployments/helm
+```
+
 ### Installing the SysFlow agent with S3 Exporter
 
 In this configuration, SysFlow exports the collected telemetry as trace files (batches of SysFlow records) to any S3-compliant object storage service.
@@ -54,7 +63,7 @@ In this configuration, SysFlow exports the collected telemetry as trace files (b
 
 This chart is located in `charts/sf-exporter-chart`, which deploys the SysFlow Collector and Exporter as a daemonset. The collector monitors the node, and writes trace files to a shared memory volume `/mnt/data` which the exporter manages and reads from to push completed traces to a S3-compliant object storage. The `/mnt/data/` is mapped to a tmpfs filesystem, and you can specify its size using the `tmpfsSize`.
 
-Installation scripts are provided to make installation easier. These scripts set up the environment including k8s secrets for S3 authentication. To connect to an S3-compliant data store, first take note of which port the S3 data store (`s3Port`) is configured. Minio installations listen on port 9000 by default. Also, if TLS is enabled on the S3 datastore, ensure `s3Secure` is `true`. Ensure that the `s3Bucket` is set to the desired S3 bucket location. The `s3Location`, `s3AccessKey` and `s3SecretKey` and `s3Endpoint` are each passed in through the installation script if you use it.
+Installation scripts are provided to make installation easier. These scripts set up the environment including k8s secrets for S3 authentication. To connect to an S3-compliant data store, first take note of which port the S3 data store (`s3Port`) is configured. Minio installations listen on port 9000 by default. Also, if TLS is enabled on the S3 datastore, ensure `s3Secure` is `true`. Ensure that the `s3Bucket` is set to the desired S3 bucket location. The `s3Location` (aka `s3_region`), `s3AccessKey` and `s3SecretKey` and `s3Endpoint` are each passed in through the installation script if you use it.
 
 To deploy the SysFlow agent with S3 export:
 
