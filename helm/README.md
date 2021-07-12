@@ -43,6 +43,15 @@ The recommended driver for minikube is VirtualBox. Check the [VirtualBox docs](h
 
 The SysFlow agent can be deployed in S3 (batch) or rsyslog (stream) export configurations.
 
+### Setup
+
+Clone this repository and change directory as follows:
+
+```bash
+git clone https://github.com/sysflow-telemetry/sf-deployments.git
+cd sf-deployments/helm
+```
+
 ### Installing the SysFlow agent with S3 Exporter
 
 In this configuration, SysFlow exports the collected telemetry as trace files (batches of SysFlow records) to any S3-compliant object storage service.
