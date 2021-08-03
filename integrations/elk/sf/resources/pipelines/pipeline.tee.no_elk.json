@@ -1,0 +1,47 @@
+{
+    "pipeline":[
+      {
+       "processor": "sysflowreader",
+       "handler": "flattener",
+       "in": "sysflow sysflowchan",
+       "out": ["flat flattenerchan", "flatraw flattenerchan"]
+      },
+      {
+       "processor": "policyengine",
+       "in": "flat flattenerchan",
+       "out": "evt eventchan",
+       "mode": "alert",
+       "policies": "/usr/local/sysflow/resources/elk/policies/ttps.yaml"
+      },
+      {
+       "processor": "policyengine",
+       "in": "flatraw flattenerchan",
+       "out": "evtraw eventchan",
+       "mode": "bypass"
+      },
+      {
+       "processor": "exporter",
+       "in": "evt eventchan",
+       "export": "es",
+       "format": "ecs",
+       "es.addresses": "https://172.17.0.1:9200",
+       "es.index": "sysflow-alerts",
+       "es.username": "elastic",
+       "es.password": "changeme",
+       "es.bulk.numWorkers": "1",
+       "buffer": "50"
+      },
+      {
+       "processor": "exporter",
+       "in": "evtraw eventchan",
+       "export": "es",
+       "format": "ecs",
+       "es.addresses": "https://172.17.0.1:9200",
+       "es.index": "sysflow-events",
+       "es.username": "elastic",
+       "es.password": "changeme",
+       "es.bulk.numWorkers": "1",
+       "buffer": "1000"
+      }
+    ]
+}

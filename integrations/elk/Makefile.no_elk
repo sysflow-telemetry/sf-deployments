@@ -1,0 +1,23 @@
+#
+# Copyright (C) 2021 IBM Corporation.
+#
+# Authors:
+# Andreas Schade <san@zurich.ibm.com>
+
+run:
+	$(MAKE) -C sf -f Makefile.no_elk run
+	$(MAKE) -C attack run
+
+halt:
+	$(MAKE) -C attack stop
+	$(MAKE) -C sf -f Makefile.no_elk stop
+
+stop: halt
+
+build:
+	$(MAKE) -C sf -f Makefile.no_elk build
+	$(MAKE) -C attack build
+
+clean:
+	$(MAKE) -C attack clean
+	$(MAKE) -C sf -f Makefile.no_elk clean

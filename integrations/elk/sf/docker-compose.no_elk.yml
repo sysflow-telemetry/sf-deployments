@@ -1,0 +1,45 @@
+#
+# Copyright (C) 2020 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+# Andreas Schade <san@zurich.ibm.com> - ELK demonstrator
+#
+version: "3.5"
+services:
+  sf-processor:
+    container_name: sf-processor
+    image: sysflowtelemetry/sf-processor:edge
+    privileged: true
+    volumes:
+      - socket-vol:/sock/
+      - "./resources:/usr/local/sysflow/resources/elk"
+    environment:
+      DRIVER: socket
+      INPUT_PATH: /sock/sysflow.sock
+      CONFIG_PATH: /usr/local/sysflow/resources/elk/pipelines/pipeline.tee.no_elk.json
+      EXPORTER_SOURCE: localhost
+  sf-collector:
+    container_name: sf-collector
+    image: sysflowtelemetry/sf-collector:edge
+    depends_on:
+      - "sf-processor"
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock 
+      - /dev:/host/dev 
+      - /proc:/host/proc:ro 
+      - /boot:/host/boot:ro 
+      - /lib/modules:/host/lib/modules:ro 
+      - /usr:/host/usr:ro
+      - socket-vol:/sock/
+    environment:
+      EXPORTER_ID: local
+      NODE_IP: "127.0.0.1"
+      FILTER: ${FILTER}
+      INTERVAL: 300 
+      SOCK_FILE: /sock/sysflow.sock
+volumes:
+  socket-vol:
+
