@@ -1,11 +1,3 @@
-#
-# Copyright (C) 2021 IBM Corporation.
-#
-# Authors:
-# Frederico Araujo <frederico.araujo@ibm.com>
-# Teryl Taylor <terylt@ibm.com>
-# Andreas Schade <san@zurich.ibm.com>
-
 ###### Lists ####################
 
 - list: shell_binaries
