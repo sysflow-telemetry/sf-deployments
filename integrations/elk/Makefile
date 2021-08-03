@@ -1,10 +1,8 @@
-#!/bin/bash
 #
 # Copyright (C) 2021 IBM Corporation.
 #
 # Authors:
-# Frederico Araujo <frederico.araujo@ibm.com>
-# Teryl Taylor <terylt@ibm.com>
+# Andreas Schade <san@zurich.ibm.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +16,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-oc delete -f deploy/crds/charts.helm.k8s.io_v1alpha1_sfexporterchart_cr.yaml
-oc delete -f deploy/operator.yaml
-oc delete -f deploy/role_binding.yaml
-#kubectl delete -f deploy/role.yaml
-oc delete -f deploy/service_account.yaml
-#kubectl delete -f deploy/service_account_app.yaml
-oc delete -f deploy/sysflow_scc.yaml
-#kubectl delete -f deploy/crds/charts.helm.k8s.io_sfexportercharts_crd.yaml 
+run:
+	$(MAKE) -C elk run
+	$(MAKE) -C sf run
+	$(MAKE) -C attack run
+
+halt:
+	$(MAKE) -C attack stop
+	$(MAKE) -C sf stop
+
+stop: halt
+	$(MAKE) -C elk stop
+
+build:
+	$(MAKE) -C elk build
+	$(MAKE) -C sf build
+	$(MAKE) -C attack build
+
+clean:
+	$(MAKE) -C attack clean
+	$(MAKE) -C sf clean
+	$(MAKE) -C elk clean

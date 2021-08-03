@@ -1,0 +1,60 @@
+#
+# Copyright (C) 2021 IBM Corporation.
+#
+# Authors:
+# Frederico Araujo <frederico.araujo@ibm.com>
+# Teryl Taylor <terylt@ibm.com>
+# Andreas Schade <san@zurich.ibm.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+version: "3.5"
+services:
+  sf-processor:
+    container_name: sf-processor
+    image: sysflowtelemetry/sf-processor:edge
+    privileged: true
+    volumes:
+      - socket-vol:/sock/
+      - "./resources:/usr/local/sysflow/resources/elk"
+    environment:
+      DRIVER: socket
+      INPUT_PATH: /sock/sysflow.sock
+      CONFIG_PATH: /usr/local/sysflow/resources/elk/pipelines/pipeline.tee.elk.json
+      EXPORTER_SOURCE: localhost
+  sf-collector:
+    container_name: sf-collector
+    image: sysflowtelemetry/sf-collector:edge
+    depends_on:
+      - "sf-processor"
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock 
+      - /dev:/host/dev 
+      - /proc:/host/proc:ro 
+      - /boot:/host/boot:ro 
+      - /lib/modules:/host/lib/modules:ro 
+      - /usr:/host/usr:ro
+      - socket-vol:/sock/
+    environment:
+      EXPORTER_ID: local
+      NODE_IP: "127.0.0.1"
+      FILTER: ${FILTER}
+      INTERVAL: 300 
+      SOCK_FILE: /sock/sysflow.sock
+volumes:
+  socket-vol:
+networks:
+  default:
+    external: true
+    name: docker-elk_elk
+
