@@ -1,112 +1,106 @@
-# SysFlow-ELK-Demonstrator
+# SysFlow ELK Integration
 
-In this article we demonstrate the [SysFlow Telemetry Pipeline](https://sysflow.readthedocs.io/en/latest/index.html)
-for monitoring cloud workloads and collecting security analytics data and its
-newly added support for ElasticSearch. SysFlow can help detect potentially
-malicious workloads in container environments such as Docker, Kubernetes and
-RedHat OpenShift by collecting evidence data and extracting indicators of
-compromise. In our sample setup on Docker, we will 
+This integration shows how to use [SysFlow](https://sysflow.readthedocs.io/en/latest/index.html)
+to monitor on-premise and cloud workloads, and collect security analytics 
+data using its ElasticSearch connector. SysFlow detects potentially
+malicious activity in container environments, such as Docker, Kubernetes, and
+RedHat OpenShift, by collecting evidence data and extracting indicators of
+compromise. 
+
+In this example deployment, we will:
 
 - collect telemetry events exposed by running containers,
 - apply polices on the raw events and generate alerts,
-- translate both alerts and raw events to Elastic Common Schema and 
+- translate both alerts and raw events to Elastic Common Schema (ECS), and 
 - store the results in ELK for flexible querying with ElasticSearch and
   visualization using Kibana.
 
 Speaking in terms of [MITRE ATT&CK&reg;](https://attack.mitre.org)
 [tactics](https://attack.mitre.org/tactics/enterprise/), we skip the Initial
 Access phase and focus mainly on [Discovery](https://attack.mitre.org/tactics/TA0007/)
-and [Command and Control](https://attack.mitre.org/tactics/TA0011/) tactics
-in this demonstrator. We assume a point in time at which an attacker
+and [Command and Control](https://attack.mitre.org/tactics/TA0011/) techniques
+in this use case. We assume a point in time at which an attacker
 has already established a foothold on the system and can execute commands.
-The attacker will then try to figure out the environment or to install
-additional tools to improve his position. The purpose of this demonstrator
-is to make these steps visible by generating alerts for characteristic commands
-(e.g., displaying the contents of `/etc/passwd` or downloading files) or
+The attacker will then try to perform reconnaissance over the environment 
+or to install additional tools required for the attack. The telemetry stack
+makes these steps visible by generating alerts for characteristic commands
+(e.g., displaying the contents of `/etc/passwd` or downloading files), or
 providing access to the full telemetry data for event correlation.
 
-The first sections of this article are written in a tutorial style to help
-the reader install and  run our demonstrator and see the results. This part
-is followed by more technical sections providing the details of our setup 
-and explaining the individual processing steps.
+We start with a tutorial on how to install and run this telemetry stack, and 
+analyze the collected data using ELK. This is followed by more technical 
+discussion that provides the details of our setup and explaination of 
+the individual processing steps.
 
 
 ## Prerequisites 
 
-You need a running Linux system with docker and docker-compose installed. We
-tested our demonstrator setup on an Ubuntu 20.04 system with docker 20.10.2
-and docker-compose version 1.25.0.
+Ubuntu 20.04 system with docker 20.10.2 and docker-compose version 1.25.0 pre-installed on the machine.
 
+## Setup
 
-## Cloning the repository
-
-To run our demonstrator, you need to clone this repository and build the code.
-To clone, click on the __Code__ widget above the file list on the github page,
-copy the URL shown on the __HTTPS__ tab, open a terminal and run
+First, clone this git repository and enter the working directory for the ELK integration.
 
 ```shell
-git clone <URL>
-cd SysFlow-ELK-Demonstrator
+git clone https://github.com/sysflow-telemetry/sf-deployments.git
+cd sf-deployments/integrations/elk
 ```
 
-Please note that all directory and file paths in the following sections of
-this document will be shown relatively to the root directory
-`SysFlow-ELK-Demonstrator`.
+Directories and file paths shown below are relative to this working directory.
 
-## Building the code
+## Build
 
 Our setup consists of 
 
 - [Anthony Lapenna's](https://github.com/deviantony)
   [ELK Stack on Docker](https://github.com/deviantony/docker-elk/tree/tls).
-  We will use the `tls` branch which provides a TLS-enabled instance of
+  We will use the `tls` branch, which provides a TLS-enabled instance of
   ElasticSearch. We will run only two containers from this package,
   ElasticSearch and Kibana. Both components use the
   [ELK stack's default credentials](https://github.com/deviantony/docker-elk/tree/tls#setting-up-user-authentication).
-  Logstash has been disabled for the purpose of this demonstrator. The code
+  Logstash has been disabled for the purpose of this setup. The scripts
   for running the ELK stack is in the directory `elk`.
 - The [SysFlow telemetry pipeline](https://sysflow.readthedocs.io/en/latest/)
   consisting of the [SysFlow Collector](https://github.com/sysflow-telemetry/sf-collector)
   and the [SysFlow Processor](https://github.com/sysflow-telemetry/sf-processor).
-  Both components will run as docker containers. The code for running the
+  Both components will run as docker containers. The scripts for running the
   SysFlow pipeline is in the directory `sf`.
-- A custom-made attack container which plays the part of an attacker
+- A custom-made attack container, which plays the part of an attacker
   running discovery commands. The code for running the attacker is in the
   directory `attack`.
 
 We use `make` to control building, running, stopping and cleaning up the
-repository. The main `Makefile` resides in `SysFlow-ELK-Demonstrator`. There are
-dedicated Makefiles in all sub-directories. Every Makefile supports five
-targets:
+repository. The main `Makefile` resides in root of the working directory. 
+There are dedicated Makefiles in all sub-directories. Every Makefile 
+supports five targets:
 
-- `build` for compiling code and fetching and building docker images.
-- `run` for running the demonstrator
-- `stop` for stopping the containers and
+- `build` for compiling code and fetching and building docker images,
+- `run` for running the demonstrator,
+- `stop` for stopping the containers, and
 - `clean` for deleting the containers and removing the docker images.
 
 You can control each component separately by using `make` in the
 corresponding sub-directory.
 
 If you want to use the built-in ELK stack, you can install all components
-by running a single command
+by running a single command:
 
 ```shell
 make build
 ```
 
-We also support ingesting into an existing external Elastic cluster. For
+We also support ingestion into an existing external Elastic cluster. For
 more information please refer to the section on
 [using an external Elastic cluster](#using-an-external-elastic-cluster).
 
 
-## Running the demonstrator
+## Deployment
 
-The demonstrator deploys a SysFlow pipeline that collects telemetry data and
+This example deploys a SysFlow pipeline that collects telemetry data and
 produces a stream of alerts and another stream of raw SysFlow events. The
-pipeline translates the data in both streams to ECS and writes the result to
-two separate ElasticSearch indices which can be viewed using Kibana. To start
-the demonstrator, change to the directory `Sysflow-ELK-Demonstrator` and
-run
+pipeline translates the data from both streams to ECS, and writes the result to
+two separate ElasticSearch indices, which can be viewed using Kibana. To start
+the example scenario, run:
 
 ```shell
 make run
@@ -147,16 +141,14 @@ Step 6
 make[1]: Leaving directory '.../SysFlow-ELK-Demonstrator/attack'
 ```
 
+## Data Analysis
 
-## Viewing the results
+There are two types of results, alerts and raw events, which can be viewed using Kibana.
 
-There are two types of results, alerts and raw events, which are stored in
-separate indices and can be view using Kibana.
+### Alerts
 
-### Viewing alerts
-
-Our demonstrator generates alerts enriched with related MITRE technique tags
-and alert reasons. By default, the demonstrator writes these alerts into an
+The telemetry stack generates alerts enriched with MITRE ATT&CK&reg; technique tags
+and alert reasons. By default, the example telemetry stack writes these alerts into an
 ElasticSearch index `sysflow-alerts`. To view the alert in this index, direct
 your browser to Kibana at `http://localhost:5601`. Log in using the ELK
 default credentials. 
@@ -164,7 +156,7 @@ default credentials.
 Kibana requires an index pattern to view data from ElasticSearch
 indices. If there's no index pattern yet, you are requested to
 create one. You can either click on the __Create index pattern__ button and
-step through the wizard or use the following command to create an index
+step through the wizard, or use the following command to create an index
 pattern tailored to the SysFlow ECS data.
 
 ```shell
@@ -177,18 +169,18 @@ select the `sysflow-alerts` index pattern in the __Change Index Pattern__
 field in the upper left. In the upper right corner next to the __Refresh__
 button set the time range appropriately, e.g., to `Last 15 minutes`. In the
 __Available fields__ box on the left select the alert fields you want to see.
-For the beginning start with `event.reason`, `tags`, and
+To get started, inspect `event.reason`, `tags`, and
 `process.command_line`. You should see SysFlow alerts as shown in the
 picture below.
 
 ![Kibana visualization of the alerts index](images/alerts.png?raw=true "Kibana visualization of the alerts index")
 
-### Viewing raw events
+### Raw Events
 
-In parallel to generating alerts, the demonstrator also translates raw
+Concurrent to alert generation, the telemetry stack also translates raw
 SysFlow events to ECS records and stores them in an index `sysflow-events`.
 You also need an index pattern to render data from this index. We suggest to
-follow the procedure described in the [Viewing alerts  section](#viewing_alerts)
+follow the procedure described in the [Alerts section](#alerts)
 to create a separate index pattern `sysflow-events`. Once created, this index
 pattern appears in the select box on Kibona's __Discover__ pane.
 
@@ -203,10 +195,10 @@ is shown below.
 ![Kibana visualization of the events index](images/events.png?raw=true "Kibana visualization of the events index")
 
 
-## Stopping the demonstrator
+## Stop
 
-After running our demonstrator don't forget to stop it and release all
-resources consumed. You can stop the entire demonstrator by running
+After running the example scenario, don't forget to stop it. You can stop the 
+entire stack by running:
 
 ```shell
 make stop
@@ -241,7 +233,7 @@ Removing network docker-elk_elk
 make[1]: Leaving directory '.../SysFlow-ELK-Demonstrator/elk'
 ```
 
-If you want to keep using some components you can stop the components
+If you want to keep using some components, you can stop the components
 individually. If, for example, you want to leave the ELK stack operational
 simply run
 
@@ -257,10 +249,9 @@ for this particular sequence of commands.
 make halt
 ```
 
+## Architecture
 
-## Architecture of the demonstrator
-
-In total, we have 5 collaborating containers. If you run `docker ps`
+In total, we have 5 containers that participate in this ecosystem. If you run `docker ps`
 during the execution of the attack, you'll see a list similar to this:
 
 ```
@@ -274,14 +265,14 @@ c2cbe4ed7457   docker-elk_kibana                      "/bin/tini -- /usr/l…"  
 ```
 
 The docker-elk containers originate from the ELK stack. They were started
-by docker-compose. The sf containers originate from SysFlow Telemetry.
+by docker-compose. The sf containers originate from the SysFlow stack.
 They were also started by docker-compose. These four containers are
 attached to one docker network `docker-elk` that was created by the ELK
-Stack installation procedure. Thus, the SysFlow processor can "see" the
+stack installation procedure. Thus, the SysFlow processor can "see" the
 ElasticSearch endpoint under its container name in docker and we didn't
 have to provide an external address. 
 
-These containers collaborate as illustrated in the picture below
+These containers collaborate as illustrated in the picture below.
 
 ![Architecture of the demonstrator](images/pipeline.png?raw=true "Architecture of the demonstrator")
 
@@ -317,19 +308,19 @@ Each container has its dedicated purpose:
 
 ## The processor pipeline
 
-At the core of the demonstrator is the SysFlow processor. The SysFlow processor
-is a highly configurable tool that reads data provided by the collector and 
-sends them through a pipeline to the final destination. The behavior is
+At the core of this integration is the SysFlow processor. The SysFlow processor
+is a highly configurable edge processing engine that reads data provided by 
+the collector and sends them through a pipeline to the final destination. The behavior is
 controlled by a pipeline specification.
 
 The pipeline specification is a JSON document that consists of several plugins
 and describes how these plugins are connected to each other by channels to form
 a pipeline. In our case this document describes a processing tree rather than a
 pipeline. This is because each plugin can feed more than one output channel. In
-the demonstrator this fan-out is performed by the SysFlow reader which feeds two
+this deployment, this fan-out is performed by the SysFlow reader which feeds two
 policy engines which in turn serve two exporters.
 
-Below is the definition of the processor pipeline we use for the demonstrator.
+The definition of the processor pipeline for this example deployment is given below.
 The pipeline file is specified in the `CONFIG_PATH` environment variable of the
 `sf-processor` service in [sf/docker-compose.yml](sf/docker-compose.yml)
 The definition can be found in [sf/resources/pipelines/pipeline.tee.elk.json](sf/resources/pipelines/pipeline.tee.elk.json).
@@ -414,7 +405,7 @@ Our pipeline consists of five plugins that form the tree mentioned above:
 
 ## Policy-based alert generation
 
-The entry point of the [attack](attack) container in our demonstrator is a
+The entry point of the [attack](attack) container in our setup is a
 shell script that runs a couple of discovery commands similar to what a real
 attacker would do after hacking into the system.
 
@@ -467,7 +458,7 @@ sf-processor container. The full list of
 can be found in the processor documentation. The policy engine evaluates
 a set of policies whose conditions are predicate expressions over SysFlow
 event attributes. One of the rules specified in the [TTPS policy file](sf/resoources/policies/ttps.yaml)
-used in this demonstrator matches the PE event corresponding to the start
+used in this deployment matches the PE event corresponding to the start
 of the `cat` process:
 
 ```yaml
@@ -568,8 +559,8 @@ ingested as the result of the last attack step in our example.
 
 ## Inspecting detailed process events
 
-In addition to generating alerts, the demonstrator also writes all raw events
-to ElasticSearch. While this part of the pipeline generates much more data, it
+In addition to generating alerts, the telemetry stack also writes all raw events
+to ElasticSearch. While this part of the pipeline generates significanlty more data, it
 provides very detailed insights into the behavior of particular attack steps.
 Let's have a look at the `wget` command that was executed as the last step of
 the attack.
@@ -637,18 +628,17 @@ ElasticSearch endpoints and credentials in `es.addresses` and
 `es.username/es.passsword`, respectively. We provide a set of alternative
 Makefiles \(`Makefile.no_elk` in `SysFlow-ELK-Demonstrator` and in
 `SysFlow-ELK-Demonstrator/sf`\) for this use case. You can run and stop the
-demonstrator targeting an external Elastic cluster with the commands
+telemetry stack targeting an external Elastic cluster with the commands
 
 ```shell
 make -f Makefile.no_elk run
 make -f Makefile.no_elk stop
 ```
 
-
 ## Licensing
 
 The code in repository as well as all SysFlow images are licensed
-under [Apache License 2.0](LICENSE.md). This demonstrator also uses
+under [Apache License 2.0](LICENSE.md). This deployment also uses
 [Anthony Lapenna's](https://github.com/deviantony) [ELK Stack on Docker](https://github.com/deviantony/docker-elk/tree/tls)
 which is licensed under [MIT license](https://github.com/deviantony/docker-elk/blob/tls/LICENSE).
 
