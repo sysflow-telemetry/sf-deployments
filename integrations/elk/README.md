@@ -638,7 +638,7 @@ make -f Makefile.no_elk stop
 ## Licensing
 
 The code in repository as well as all SysFlow images are licensed
-under [Apache License 2.0](LICENSE.md). This deployment also uses
+under [Apache License 2.0](../../LICENSE.md). This deployment also uses
 [Anthony Lapenna's](https://github.com/deviantony) [ELK Stack on Docker](https://github.com/deviantony/docker-elk/tree/tls)
 which is licensed under [MIT license](https://github.com/deviantony/docker-elk/blob/tls/LICENSE).
 
