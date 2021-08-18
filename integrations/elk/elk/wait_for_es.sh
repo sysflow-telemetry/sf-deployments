@@ -3,8 +3,7 @@
 # Copyright (C) 2021 IBM Corporation.
 #
 # Authors:
-# Frederico Araujo <frederico.araujo@ibm.com>
-# Teryl Taylor <terylt@ibm.com>
+# Andreas Schade <san@zurich.ibm.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +17,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-oc delete -f deploy/crds/charts.helm.k8s.io_v1alpha1_sfexporterchart_cr.yaml
-oc delete -f deploy/operator.yaml
-oc delete -f deploy/role_binding.yaml
-#kubectl delete -f deploy/role.yaml
-oc delete -f deploy/service_account.yaml
-#kubectl delete -f deploy/service_account_app.yaml
-oc delete -f deploy/sysflow_scc.yaml
-#kubectl delete -f deploy/crds/charts.helm.k8s.io_sfexportercharts_crd.yaml 
+ready() {
+    eval "curl -k -ssl -u elastic:changeme -XGET https://localhost:9200/_status" > /dev/null 2> /dev/null
+}
+
+echo -n "Waiting for ElasticSearch "
+i=0
+while ! ready; do
+    i=$(expr $i + 1)
+    echo -n "."
+    sleep 3
+done
+
+echo 
+

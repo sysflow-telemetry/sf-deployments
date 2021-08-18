@@ -82,6 +82,8 @@ spec:
         - mountPath: /sock
           name: sysflowsock
           readOnly: false
+        - mountPath: /usr/local/sysflow/resources/policies/
+          name: rule-config-volume
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
@@ -241,3 +243,6 @@ spec:
       - name: usr
         hostPath:
           path: /usr
+      - name: rule-config-volume
+        configMap:
+          name: rule-config

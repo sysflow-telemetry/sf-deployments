@@ -45,7 +45,7 @@ resources:
 
 sfcollector:
   # Pull policy for image (Always|Never|IfNotPresent)
-  imagepullpolicy: IfNotPresent
+  imagePullPolicy: IfNotPresent
   # Image repository
   repository: sysflowtelemetry/sf-collector
   # Image tag
@@ -76,7 +76,7 @@ sfcollector:
 
 sfprocessor:
   # Comment out if you always want to pull images
-  imagepullpolicy: IfNotPresent
+  imagePullPolicy: IfNotPresent
   # Image repository
   repository: sysflowtelemetry/sf-processor
   # Image tag
