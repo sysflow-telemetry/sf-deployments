@@ -27,13 +27,13 @@ registry:
 # sysflow collection probe parameters
 sfcollector:
   # Comment out if you always want to pull images 
-  imagepullpolicy: IfNotPresent
+  imagePullPolicy: IfNotPresent
   # image repository
   repository: sysflowtelemetry/sf-collector
   # image tag
-  tag: latest
+  tag: 0.2.2
   # timeout in seconds to start roll a new trace files
-  interval: 300
+  interval: 60
   # output directory, where traces are written to inside container
   outDir: /mnt/data/
   # collection filter
@@ -56,18 +56,22 @@ sfcollector:
   # "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
   readMode: "0"
   # enables ebpf probe (required for minikube)
-  ebpf: false
+  ebpf: true
   # mounts /etc directory in container (required for minikube and Google COS)
-  mountEtc: false
+  mountEtc: true
+  # k8s API URL
+  k8sAPIURL: "http://localhost:8001"
+  # k8s API Cert
+  #k8sAPICert:
 
 # sysflow exporter parameters
 sfexporter:
   # Comment out if you always want to pull images 
-  imagepullpolicy: IfNotPresent
+  imagePullPolicy: IfNotPresent
   # image repository
   repository: sysflowtelemetry/sf-exporter
   # image tag
-  tag: edge
+  tag: latest
   # export inverval
   interval: 30
   # directory where traces are read from inside container
