@@ -38,13 +38,14 @@ services:
       - "sf-processor"
     privileged: true
     volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock 
-      - /dev:/host/dev 
+      - /root/.falco:/root/.falco
       - /proc:/host/proc:ro 
       - /boot:/host/boot:ro 
       - /lib/modules:/host/lib/modules:ro 
       - /usr:/host/usr:ro
-      - socket-vol:/sock/
+      - /etc:/host/etc:ro
+      - /mnt/data:/mnt/data
+      - socket-vol:/sock/      
     environment:
       EXPORTER_ID: local
       NODE_IP: "127.0.0.1"
