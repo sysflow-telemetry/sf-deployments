@@ -23,7 +23,7 @@ yum -y install kernel-devel-$(uname -r)
 
 ## Deploy SysFlow
 
-Three deployment configurations are described below: _local_ (collector-only), _S3_ (batch) export mode, and _rsyslog_ (stream) export mode. The local deployment stores collected traces on the local filesystem and the full stack deployments export the collected traces to a S3-compatible object storage server or streams SysFlow records to remote syslog server.
+Three deployment configurations are described below: _local_ (collector-only), _batch_  export mode, and _stream_ export mode. The local deployment stores collected traces on the local filesystem and the full stack deployments export the collected traces to a S3-compatible object storage server or streams SysFlow records to remote syslog server or ELK (additional exporters can be implemented as plugins).
 
 ### Setup
 
@@ -52,7 +52,7 @@ To stop the collection probe:
 docker-compose -f docker-compose.collector.yml down
 ```
 
-### S3 export deployment
+### Batch export
 
 This deployment configuration includes the SysFlow Collector and S3 Exporter.
 
@@ -94,9 +94,9 @@ To stop the local minio instance and the telemetry stack:
 docker-compose -f docker-compose.minio.yml -f docker-compose.exporter.yml down
 ```
 
-### RSyslog export deployment with edge processing
+### Stream processing
 
-This deployment configuration includes the SysFlow Collector and Processor with rsyslog exporter.
+This deployment configuration includes the SysFlow Collector and Processor with rsyslog exporter. Alternatively, you can change the Processor configuration to stream events to ELK, or any other custom exporter plugin. Check the [Processor's exporter configuration](https://sysflow.readthedocs.io/en/latest/processor.html#exporter-configuration) for details on how to configure the exporter to stream events to other backends.
 
 <center>
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />    
@@ -152,7 +152,7 @@ sysprint -i s3 -c <s3_endpoint> -a <s3_access_key> -s <s3_secret_key> <bucket_na
 
 ### Inspect example traces
 
-Sample trace files are provided in `tests`. Copy them into `/mnt/data` to inspect inside sysprint's environment.
+Sample trace files are provided in `sf-collector/tests`. Copy them into `/mnt/data` to inspect inside sysprint's environment.
 
 ```bash
 sysprint /mnt/data/tests/client-server/tcp-client-server.sf
@@ -166,7 +166,7 @@ A [Jupyter environment](https://hub.docker.com/r/sysflowtelemetry/sfnb) is also 
 
 ```bash
 git clone https://github.com/sysflow-telemetry/sf-apis.git && cd sf-apis
-docker run --rm -d --name sfnb --user $(id -u):$(id -g) --group-add users -v $(pwd)/pynb:/home/jovyan/work -p 8888:8888 sysflowtelemetry/sfnb
+docker run --rm -d --name sfnb -v $(pwd)/pynb:/home/jovyan/work -p 8888:8888 sysflowtelemetry/sfnb
 ```
 
 Then, open a web browser and point it to `http://localhost:8888` (alternatively, the remote server name or IP where the notebook is hosted). To obtain the notebook authentication token, run `docker logs sfnb`.

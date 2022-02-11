@@ -37,12 +37,12 @@ services:
     image: sysflowtelemetry/sf-collector:latest
     privileged: true
     volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock 
-      - /dev:/host/dev 
+      - /root/.falco:/root/.falco
       - /proc:/host/proc:ro 
       - /boot:/host/boot:ro 
       - /lib/modules:/host/lib/modules:ro 
       - /usr:/host/usr:ro
+      - /etc:/host/etc:ro
       - /mnt/data:/mnt/data
     environment:            
       OUTPUT: /mnt/data/ # trace files directory prefix

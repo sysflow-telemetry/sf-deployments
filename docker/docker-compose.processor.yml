@@ -9,7 +9,7 @@ version: "3.5"
 services:
   sf-processor:
     container_name: sf-processor
-    image: sysflowtelemetry/sf-processor:latest    
+    image: sysflowtelemetry/sf-processor:0.4.0-rc1
     volumes:
       - socket-vol:/sock/
     environment:
@@ -19,17 +19,17 @@ services:
       - ./config/.env.processor
   sf-collector:
     container_name: sf-collector
-    image: sysflowtelemetry/sf-collector:latest
+    image: sysflowtelemetry/sf-collector:0.4.0-rc1
     depends_on:
       - "sf-processor"
     privileged: true
     volumes:
-      - /var/run/docker.sock:/host/var/run/docker.sock 
-      - /dev:/host/dev 
+      - /root/.falco:/root/.falco
       - /proc:/host/proc:ro 
       - /boot:/host/boot:ro 
       - /lib/modules:/host/lib/modules:ro 
       - /usr:/host/usr:ro
+      - /etc:/host/etc:ro
       - /mnt/data:/mnt/data
       - socket-vol:/sock/      
     environment:            
