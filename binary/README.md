@@ -9,7 +9,7 @@ We package SysFlow for debian- and rpm-based distros.
 Download the SysFlow packages (replace `VERSION` with a Sysflow release >=0.4.0):
 
 ```bash
-wget https://github.com/sysflow-telemetry/sf-collector/releases/download/<VERSION>/sfprocessor-<VERSION>-x86_64.deb \
+wget https://github.com/sysflow-telemetry/sf-collector/releases/download/<VERSION>/sfcollector-<VERSION>-x86_64.deb \
      https://github.com/sysflow-telemetry/sf-processor/releases/download/<VERSION>/sfprocessor-<VERSION>-x86_64.deb
 ```
 
@@ -30,7 +30,7 @@ dpkg -i sfcollector-<VERSION>-x86_64.deb sfprocessor-<VERSION>-x86_64.deb
 Download the SysFlow packages (replace `VERSION` with a Sysflow release >=0.4.0):
 
 ```bash
-wget https://github.com/sysflow-telemetry/sf-collector/releases/download/<VERSION>/sfprocessor-<VERSION>-x86_64.rpm \
+wget https://github.com/sysflow-telemetry/sf-collector/releases/download/<VERSION>/sfcollector-<VERSION>-x86_64.rpm \
      https://github.com/sysflow-telemetry/sf-processor/releases/download/<VERSION>/sfprocessor-<VERSION>-x86_64.rpm
 ```
 
