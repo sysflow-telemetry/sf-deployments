@@ -6,16 +6,16 @@ We package SysFlow for debian- and rpm-based distros.
 
 ### Debian distributions
 
-Download the SysFlow packages (replace `VERSION` with a Sysflow release >=0.4.0):
+Download the SysFlow packages (set `$VERSION` to a Sysflow release >=0.4.0):
 
 ```bash
-wget https://github.com/sysflow-telemetry/sf-collector/releases/download/<VERSION>/sfcollector-<VERSION>-x86_64.deb \
-     https://github.com/sysflow-telemetry/sf-processor/releases/download/<VERSION>/sfprocessor-<VERSION>-x86_64.deb
+wget https://github.com/sysflow-telemetry/sf-collector/releases/download/$VERSION/sfcollector-$VERSION-x86_64.deb \
+     https://github.com/sysflow-telemetry/sf-processor/releases/download/$VERSION/sfprocessor-$VERSION-x86_64.deb
 ```
 
 Install pre-requisites:
 
-```
+```bash
 apt install -y gcc make libelf-dev libsnappy-dev libgoogle-glog-dev llvm dkms linux-headers-$(uname -r) 
 ```
 
@@ -27,11 +27,11 @@ dpkg -i sfcollector-<VERSION>-x86_64.deb sfprocessor-<VERSION>-x86_64.deb
 
 ### RPM distributions
 
-Download the SysFlow packages (replace `VERSION` with a Sysflow release >=0.4.0):
+Download the SysFlow packages (set `$VERSION` to a Sysflow release >=0.4.0):
 
 ```bash
-wget https://github.com/sysflow-telemetry/sf-collector/releases/download/<VERSION>/sfcollector-<VERSION>-x86_64.rpm \
-     https://github.com/sysflow-telemetry/sf-processor/releases/download/<VERSION>/sfprocessor-<VERSION>-x86_64.rpm
+wget https://github.com/sysflow-telemetry/sf-collector/releases/download/$VERSION/sfcollector-$VERSION-x86_64.rpm \
+     https://github.com/sysflow-telemetry/sf-processor/releases/download/$VERSION/sfprocessor-$VERSION-x86_64.rpm
 ```
 
 Install pre-requisites (Instructions for Rhel8 below):
