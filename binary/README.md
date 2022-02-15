@@ -22,7 +22,7 @@ apt install -y gcc make libelf-dev libsnappy-dev libgoogle-glog-dev llvm dkms li
 Install the SysFlow packages:
 
 ```bash
-dpkg -i sfcollector-<VERSION>-x86_64.deb sfprocessor-<VERSION>-x86_64.deb
+dpkg -i sfcollector-$VERSION-x86_64.deb sfprocessor-$VERSION-x86_64.deb
 ```
 
 ### RPM distributions
@@ -55,7 +55,7 @@ dnf -y remove epel-release && dnf autoremove
 Install the SysFlow packages:
 
 ```bash
-rmp -i sfcollector-<VERSION>-x86_64.rpm sfprocessor-<VERSION>-x86_64.rpm
+rmp -i sfcollector-$VERSION-x86_64.rpm sfprocessor-$VERSION-x86_64.rpm
 ```
 
 ### Running
