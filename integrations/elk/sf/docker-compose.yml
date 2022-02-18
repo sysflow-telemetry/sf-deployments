@@ -21,7 +21,7 @@ version: "3.5"
 services:
   sf-processor:
     container_name: sf-processor
-    image: sysflowtelemetry/sf-processor:edge
+    image: sysflowtelemetry/sf-processor:latest
     privileged: true
     volumes:
       - socket-vol:/sock/
@@ -33,19 +33,19 @@ services:
       EXPORTER_SOURCE: localhost
   sf-collector:
     container_name: sf-collector
-    image: sysflowtelemetry/sf-collector:edge
+    image: sysflowtelemetry/sf-collector:latest
     depends_on:
       - "sf-processor"
     privileged: true
     volumes:
-      - /root/.falco:/root/.falco
+      - /var/run/docker.sock:/host/var/run/docker.sock 
+      - /dev:/host/dev 
       - /proc:/host/proc:ro 
       - /boot:/host/boot:ro 
       - /lib/modules:/host/lib/modules:ro 
-      - /usr:/host/usr:ro
-      - /etc:/host/etc:ro
-      - /mnt/data:/mnt/data
-      - socket-vol:/sock/      
+      - /usr:/host/usr:ro 
+      - /etc:/host/etc:ro 
+      - socket-vol:/sock/
     environment:
       EXPORTER_ID: local
       NODE_IP: "127.0.0.1"
