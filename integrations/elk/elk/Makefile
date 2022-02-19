@@ -31,7 +31,9 @@ build:
 	-git clone https://github.com/deviantony/docker-elk.git
 	cd docker-elk && git checkout tls
 	cd docker-elk && mv elasticsearch/config/elasticsearch.yml elasticsearch/config/elasticsearch.yml.orig && cp -p ../elasticsearch.yml elasticsearch/config/elasticsearch.yml
+	cd docker-elk && mv kibana/config/kibana.yml kibana/config/kibana.yml.orig && cp -p ../kibana.yml kibana/config/kibana.yml
 	cd docker-elk && mv docker-compose.yml docker-compose.yml.orig && cp -p ../docker-compose.yml docker-compose.yml
+	cd docker-elk && mv .env .env.orig && cp -p ../.env .env
 
 clean:
 	docker rmi -f docker-elk_kibana:latest
