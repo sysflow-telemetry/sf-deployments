@@ -1,35 +1,24 @@
-
 version: '3.2'
 
 services:
   elasticsearch:
+    container_name: elasticsearch
     build:
       context: elasticsearch/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:
-      - type: bind
-        source: ./elasticsearch/config/elasticsearch.yml
-        target: /usr/share/elasticsearch/config/elasticsearch.yml
-        read_only: true
-      - type: volume
-        source: elasticsearch
-        target: /usr/share/elasticsearch/data
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro,z
+      - elasticsearch:/usr/share/elasticsearch/data:z
       # (!) TLS certificates. Generate using instructions from tls/README.md.
-      - type: bind
-        source: ./tls/elasticsearch/elasticsearch.p12
-        target: /usr/share/elasticsearch/config/elasticsearch.p12
-        read_only: true
-      - type: bind
-        source: ./tls/elasticsearch/http.p12
-        target: /usr/share/elasticsearch/config/http.p12
-        read_only: true
+      - ./tls/elasticsearch/elasticsearch.p12:/usr/share/elasticsearch/config/elasticsearch.p12:ro,z
+      - ./tls/elasticsearch/http.p12:/usr/share/elasticsearch/config/http.p12:ro,z
     ports:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx2g -Xms2g"
-      ELASTIC_PASSWORD: changeme
+      ES_JAVA_OPTS: -Xmx2g -Xms2g
+      ELASTIC_PASSWORD: 'changeme'
       # Use single node discovery in order to disable production mode and avoid bootstrap checks.
       # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
@@ -42,46 +31,32 @@ services:
 #      args:
 #        ELK_VERSION: $ELK_VERSION
 #    volumes:
-#      - type: bind
-#        source: ./logstash/config/logstash.yml
-#        target: /usr/share/logstash/config/logstash.yml
-#        read_only: true
-#      - type: bind
-#        source: ./logstash/pipeline
-#        target: /usr/share/logstash/pipeline
-#        read_only: true
+#      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+#      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
 #      # (!) CA certificate. Generate using instructions from tls/README.md
-#      - type: bind
-#        source: ./tls/kibana/elasticsearch-ca.pem
-#        target: /usr/share/logstash/config/elasticsearch-ca.pem
-#        read_only: true
+#      - ./tls/kibana/elasticsearch-ca.pem:/usr/share/logstash/config/elasticsearch-ca.pem:ro,z
 #    ports:
 #      - "5044:5044"
 #      - "5000:5000/tcp"
 #      - "5000:5000/udp"
 #      - "9600:9600"
 #    environment:
-#      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+#      LS_JAVA_OPTS: -Xmx256m -Xms256m
 #    networks:
 #      - elk
 #    depends_on:
 #      - elasticsearch
 
   kibana:
+    container_name: kibana
     build:
       context: kibana/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:
-      - type: bind
-        source: ./kibana/config/kibana.yml
-        target: /usr/share/kibana/config/kibana.yml
-        read_only: true
+      - ./kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
       # (!) CA certificate. Generate using instructions from tls/README.md.
-      - type: bind
-        source: ./tls/kibana/elasticsearch-ca.pem
-        target: /usr/share/kibana/config/elasticsearch-ca.pem
-        read_only: true
+      - ./tls/kibana/elasticsearch-ca.pem:/usr/share/kibana/config/elasticsearch-ca.pem:ro,z
     ports:
       - "5601:5601"
     networks:
@@ -95,4 +70,3 @@ networks:
 
 volumes:
   elasticsearch:
-
