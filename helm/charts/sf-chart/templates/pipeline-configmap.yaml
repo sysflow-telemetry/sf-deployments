@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if .Values.sfprocessor.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: rule-config
+  name: sysflow-pipeline-config
   labels:
     {{- include "sysflowagent.labels" . | nindent 4 }}
 data: 
-{{ (.Files.Glob "rules/*").AsConfig | indent 2 }}
+{{ (.Files.Glob "config/pipeline.json").AsConfig | indent 2 }}
+{{- end }} 
