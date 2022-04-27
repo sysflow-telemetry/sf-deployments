@@ -160,7 +160,7 @@ spec:
         - name: CRI_TIMEOUT
           value: "5"
         {{- if .Values.sfcollector.ebpf }}
-        - name: SYSDIG_BPF_PROBE
+        - name: FALCO_BPF_PROBE
           value: ""
         {{- end }}
         {{- if .Values.sfcollector.dropMode }}
