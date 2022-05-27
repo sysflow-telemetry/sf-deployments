@@ -1,12 +1,12 @@
 # Binary packages
 
-SysFlow can be deployed directly on the host using its binary packages (since SysFlow 0.4.0). 
+SysFlow can be deployed directly on the host using its binary packages (since SysFlow 0.4.0).
 
 We package SysFlow for debian- and rpm-based distros.
 
 ### Debian distributions
 
-Download the SysFlow packages (set `$VERSION` to a Sysflow release >=0.4.0):
+Download the SysFlow packages (set `$VERSION` to a Sysflow release >=0.4.1):
 
 ```bash
 wget https://github.com/sysflow-telemetry/sf-collector/releases/download/$VERSION/sfcollector-$VERSION-x86_64.deb \
@@ -16,7 +16,7 @@ wget https://github.com/sysflow-telemetry/sf-collector/releases/download/$VERSIO
 Install pre-requisites:
 
 ```bash
-apt install -y gcc make libelf-dev libsnappy-dev libgoogle-glog-dev llvm dkms linux-headers-$(uname -r) 
+apt install -y llvm linux-headers-$(uname -r)
 ```
 
 Install the SysFlow packages:
@@ -27,7 +27,7 @@ dpkg -i sfcollector-$VERSION-x86_64.deb sfprocessor-$VERSION-x86_64.deb
 
 ### RPM distributions
 
-Download the SysFlow packages (set `$VERSION` to a Sysflow release >=0.4.0):
+Download the SysFlow packages (set `$VERSION` to a Sysflow release >=0.4.1):
 
 ```bash
 wget https://github.com/sysflow-telemetry/sf-collector/releases/download/$VERSION/sfcollector-$VERSION-x86_64.rpm \
@@ -40,16 +40,8 @@ Install pre-requisites (Instructions for Rhel8 below):
 subscription-manager repos --enable="codeready-builder-for-rhel-8-$(/bin/arch)-rpms"
 dnf -y update
 dnf -y install \
-    gcc \
-    make \
     kernel-devel-$(uname -r) \
-    elfutils-libelf-devel \
-    snappy-devel \
-    glog-devel \
     llvm-toolset
-dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-dnf -y install dkms
-dnf -y remove epel-release && dnf autoremove
 ```
 
 Install the SysFlow packages:
