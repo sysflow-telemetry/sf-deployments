@@ -71,4 +71,4 @@ fi
 REALPATH=$(dirname $(realpath $0))
 cd $REALPATH/../charts
 
-helm install sysflowagent ./sf-exporter-chart -f sf-exporter-chart/values.yaml --namespace sysflow --set sfexporter.s3AccessKey=$s3AccessKey --set sfexporter.s3SecretKey=$s3SecretKey --set sfexporter.s3Endpoint=$s3Endpoint --set sfexporter.s3Location=$s3Region --set sfexporter.s3Bucket=$s3Bucket --debug
+helm install sysflowagent ./sf-chart -f sf-chart/values.yaml --namespace sysflow --set sfexporter.s3AccessKey=$s3AccessKey --set sfexporter.s3SecretKey=$s3SecretKey --set sfexporter.s3Endpoint=$s3Endpoint --set sfexporter.s3Location=$s3Region --set sfexporter.s3Bucket=$s3Bucket --set sfexporter.enabled=true --set sfprocessor.enabled=false --debug

@@ -1,0 +1,431 @@
+#
+# Copyright (C) 2020 IBM Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "sysflowagent.fullname" . }}
+  labels:
+    {{- include "sysflowagent.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "sysflowagent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "sysflowagent.labels" . | nindent 8 }}
+      annotations:
+        {{- toYaml .Values.productAnnotations | nindent 8 }}
+    spec:
+      serviceAccountName: sysflow-agent
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      containers:
+      {{- if .Values.sfprocessor.enabled }}
+      - name: sfprocessor
+        image: {{ .Values.sfprocessor.repository }}:{{ .Values.sfprocessor.tag }}
+        imagePullPolicy: {{ .Values.sfprocessor.imagepullpolicy | default "" | quote }}
+        resources:
+          {{- toYaml .Values.processorresources | nindent 10 }}
+          #lifecycle:
+          #postStart:
+          #  exec:
+          #    command: ["/bin/sh","-c","sleep 10; test -e /sock/sysflow.sock && echo [postStartHook] $(date '+%Y/%m/%d %H:%M:%S') Socket /sock/sysflow.sock initialized > /proc/1/fd/1"]
+        env:
+        - name: DRIVER
+          value: socket
+        - name: INPUT_PATH
+          value: /sock/sysflow.sock
+        {{- if .Values.clusterInfoEnabled }}
+        - name: CLUSTER_ID
+          value: {{ .Values.clusterID }}
+        - name: ACCOUNT_NAME
+          value: "{{ .Values.accountName }}"
+        - name: ACCOUNT_ID
+          value: "{{ .Values.accountID }}"
+        - name: ENVIRONMENT
+          value: "{{ .Values.environment }}"
+        - name: SOLUTION
+          value: "{{ .Values.solution }}"
+        {{- end }}
+        - name: EXPORTER_FINDINGS_S3PREFIX
+          value: {{ .Values.accountName | replace " " "_" }}-{{ .Values.accountID }}/{{ .Values.solution | replace " " "_" }}/{{ .Values.environment | replace " " "_" }}
+        {{- if .Values.sfprocessor.override }}
+        - name: POLICYENGINE_MODE
+          value: alert
+        - name: EXPORTER_FORMAT
+          value: json
+        - name: EXPORTER_EXPORT
+          value: {{ .Values.sfprocessor.export | default "terminal" | quote }}
+        - name: EXPORTER_SYSLOG_TAG
+          value: sysflow
+        - name: EXPORTER_SYSLOG_HOST
+          value: {{ .Values.sfprocessor.syslogHost | quote }}
+        - name: EXPORTER_SYSLOG_PORT
+          value: {{ .Values.sfprocessor.syslogPort | default 514 | quote }}
+        - name: EXPORTER_SYSLOG_PROTO
+          value: {{ .Values.sfprocessor.syslogProto | quote }}
+        {{- end }}
+        - name: LICENSE_ACCEPT
+          value: {{ .Values.license | quote }}
+        volumeMounts:
+        {{- if .Values.findings.enabled }}
+        - mountPath: "/run/secrets/k8s"
+          name: findings-secret 
+          readOnly: true
+        - mountPath: {{ .Values.sfprocessor.findingsDir }}
+          name: findings-dir 
+          readOnly: false
+        {{- end }}
+        - mountPath: /var/run/docker.sock
+          name: dockersock
+          readOnly: false
+        - mountPath: /sock
+          name: sysflowsock
+          readOnly: false
+        {{- if .Values.sfprocessor.configMapEnabled }}
+        - mountPath: "/usr/local/sysflow/policies"
+          name: sf-policy-volume
+        - mountPath: "/usr/local/sysflow/conf"
+          name: sf-pipeline-volume
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: false
+          runAsUser: 0
+      {{- end }}
+      - name: sfcollector
+        image: {{ .Values.sfcollector.repository }}:{{ .Values.sfcollector.tag }}
+        imagePullPolicy: {{ .Values.sfcollector.imagepullpolicy | default "" | quote }}
+        resources:
+          {{- toYaml .Values.collectorresources | nindent 10 }}
+        env:
+        {{- if .Values.sfexporter.enabled }}
+        - name: OUTPUT
+          value: {{ .Values.sfcollector.outDir | quote }}
+        {{- end }} 
+        {{- if .Values.clusterInfoEnabled }}
+        - name: CLUSTER_ID
+          value: {{ .Values.clusterID }}
+        - name: ACCOUNT_NAME
+          value: "{{ .Values.accountName }}"
+        - name: ACCOUNT_ID
+          value: "{{ .Values.accountID }}"
+        - name: ENVIRONMENT
+          value: "{{ .Values.environment }}"
+        - name: SOLUTION
+          value: "{{ .Values.solution }}"     
+        {{- end }} 
+        {{- if .Values.sfprocessor.enabled }}
+        - name: SOCK_FILE
+          value: /sock/sysflow.sock
+        {{- end }} 
+        - name: FILTER
+          value: {{ .Values.sfcollector.filter | quote }}
+        - name: INTERVAL
+          value: "{{ .Values.sfcollector.interval }}"
+        - name: CRI_PATH
+          value: ""
+        - name: CRI_TIMEOUT
+          value: "5"
+        {{- if .Values.sfcollector.ebpf }}
+        - name: FALCO_BPF_PROBE
+          value: ""
+        {{- end }}
+        {{- if .Values.sfcollector.dropMode }}
+        - name: ENABLE_DROP_MODE
+          value: "1"
+        {{- end }}
+        {{- if .Values.sfcollector.fileOnly }}
+        - name: FILE_ONLY
+          value: "1"
+        {{- end }}
+        {{- if .Values.sfcollector.procFlow }}
+        - name: ENABLE_PROC_FLOW
+          value: "1"
+        {{- end }}
+        {{- if eq .Values.sfcollector.readMode "1" }}
+        - name: FILE_READ_MODE
+          value: "1"
+        {{- else if eq .Values.sfcollector.readMode "2" }}
+        - name: FILE_READ_MODE
+          value: "2"
+        {{- else }}
+        - name: FILE_READ_MODE
+          value: "0"
+        {{- end }}
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: EXPORTER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: POD_UUID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+        volumeMounts:
+        {{- if .Values.sfexporter.enabled }}
+        - mountPath: {{ .Values.sfcollector.outDir }}
+          name: data
+          readOnly: false
+        {{- end }}        
+        {{- if .Values.sfprocessor.enabled }}
+        - mountPath: /sock
+          name: sysflowsock
+          readOnly: false
+        {{- end }}        
+        - mountPath: /host/var/run/docker.sock
+          name: dockersock
+          readOnly: false
+        - mountPath: /host/var/run/crio
+          name: varrun-vol-crio
+          readOnly: false
+        - mountPath: /host/run/containerd
+          name: vol-containerd
+          readOnly: false
+        - mountPath: /host/dev
+          name: dev
+          readOnly: false
+        - mountPath: /host/proc
+          name: proc
+          readOnly: true
+        - mountPath: /host/boot
+          name: boot
+          readOnly: true
+        - mountPath: /host/lib/modules
+          name: modules
+          readOnly: true
+        - mountPath: /host/usr
+          name: usr
+          readOnly: true
+        - mountPath: /host/etc
+          name: etc-fs
+          readOnly: true
+        securityContext:
+          allowPrivilegeEscalation: true
+          privileged: true
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+          runAsUser: 0
+      {{- if .Values.sfexporter.enabled }}
+      - name: sfexporter
+        image: {{ .Values.sfexporter.repository }}:{{ .Values.sfexporter.tag }}
+        imagePullPolicy: {{ .Values.sfexporter.imagepullpolicy | default "" | quote }}
+        resources:
+          {{- toYaml .Values.exporterresources | nindent 10 }}
+        volumeMounts:
+        - mountPath: {{ .Values.sfexporter.outDir }}
+          name: data
+          readOnly: false
+        {{- if .Values.findings.enabled }}
+        - mountPath: {{ .Values.sfexporter.findingsDir }}
+          name: findings-dir 
+          readOnly: false
+        {{- end }}
+        - mountPath: "/run/secrets/k8s"
+          name: s3-secrets
+          readOnly: true
+        env:
+        {{- if .Values.clusterInfoEnabled }}
+        - name: CLUSTER_ID
+          value: {{ .Values.clusterID }}
+        - name: ACCOUNT_NAME
+          value: "{{ .Values.accountName }}"
+        - name: ACCOUNT_ID
+          value: "{{ .Values.accountID }}"
+        - name: ENVIRONMENT
+          value: "{{ .Values.environment }}"
+        - name: SOLUTION
+          value: "{{ .Values.solution }}"
+        {{- end }}
+        - name: EXPORT_TYPE
+          value: {{ .Values.sfexporter.type }}
+        - name: TO_DIR
+          value: {{ .Values.sfexporter.toDir }}
+        - name: S3_ENDPOINT
+          value: {{ .Values.sfexporter.s3Endpoint }}
+        - name: S3_PORT
+          value: "{{ .Values.sfexporter.s3Port }}"
+        - name: INTERVAL 
+          value: "{{ .Values.sfexporter.interval }}"
+        - name: S3_BUCKET
+          value: {{ .Values.sfexporter.s3Bucket }}
+        - name: S3_LOCATION
+          value: {{ .Values.sfexporter.s3Location }}
+        - name: SECURE
+          value: "{{ .Values.sfexporter.s3Secure }}"
+        - name: DIR
+          value: {{ .Values.sfexporter.dirs }}
+        - name: MODE
+          value: {{ .Values.sfexporter.mode }}
+        - name: LOG
+          value: {{ .Values.sfexporter.log }}
+        - name: S3_PREFIX
+          value: {{ .Values.accountName | replace " " "_" }}-{{ .Values.accountID }}/{{ .Values.solution | replace " " "_" }}/{{ .Values.environment | replace " " "_" }}
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        {{- if eq .Values.sfexporter.type "s3" }}
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        {{- end }}
+        - name: EXPORTER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_UUID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: POD_SERVICE_ACCOUNT
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.serviceAccountName
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: false
+          runAsUser: 0
+      {{- end }}
+      volumes:
+      {{- if or (eq .Values.findings.enabled true) (eq .Values.sfexporter.enabled true) }}
+      - name: s3-secrets
+        secret:
+          secretName: sysflow-s3-exporter-secret
+          items:
+          - key: s3_access_key
+            path: "s3_access_key"
+          - key: s3_secret_key
+            path: "s3_secret_key"
+      {{- end }}
+      {{- if .Values.findings.enabled }}
+      - name: findings-secret
+        secret:
+          secretName: sysflow-findings-secret
+          items:
+          - key: findings.apikey
+            path: "findings.apikey"        
+          - name: findings-dir
+            emptyDir: {}
+      {{- end }}
+      {{- if .Values.sfprocessor.enabled }}
+      - name: sysflowsock
+        emptyDir: {}
+      {{- end }}
+      {{- if .Values.sfexporter.enabled }}
+      - name: data
+        emptyDir:
+          medium: Memory
+          sizeLimit: {{ .Values.tmpfsSize }}
+      {{- end }}
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+      - name: etc-fs
+        hostPath:
+          path: /etc
+      - name: varrun-vol-crio
+        hostPath:
+          path: /var/run/crio
+      - name: vol-containerd
+        hostPath:
+          path: /run/containerd
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: proc
+        hostPath:
+          path: /proc
+      - name: boot
+        hostPath:
+          path: /boot
+      - name: modules
+        hostPath:
+          path: /lib/modules
+      - name: usr
+        hostPath:
+          path: /usr
+      {{- if and (eq .Values.sfprocessor.configMapEnabled true) (eq .Values.sfprocessor.enabled true) }}
+      - name: sf-policy-volume
+        configMap:
+          name: sysflow-policy-config
+      - name: sf-pipeline-volume
+        configMap:
+          name: sysflow-pipeline-config
+      {{- end -}}

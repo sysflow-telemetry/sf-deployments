@@ -1,0 +1,27 @@
+{
+  "pipeline":[
+    {
+     "processor": "sysflowreader",
+     "handler": "flattener",
+     "in": "sysflow sysflowchan",
+     "out": "flat flattenerchan"
+    },
+    {
+     "processor": "policyengine",
+     "in": "flat flattenerchan",
+     "out": "evt eventchan",
+     "policies": "/usr/local/sysflow/policies/filter.yaml",
+     "mode": "alert"
+    },
+    {
+     "processor": "exporter",
+     "in": "evt eventchan",
+     "export": "syslog",
+     "format": "json",
+     "syslog.proto": "tcp",
+     "syslog.tag": "sysflow",
+     "syslog.host": "overridden from environment",
+     "syslog.port": "overridden from environment"
+    }
+  ]
+}
