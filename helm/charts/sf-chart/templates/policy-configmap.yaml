@@ -13,16 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+{{- if .Values.sfprocessor.enabled }}
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: {{ template "sysflowagent.fullname" . }}
+  name: sysflow-policy-config
   labels:
     {{- include "sysflowagent.labels" . | nindent 4 }}
-subjects:
-- kind: ServiceAccount
-  name: sysflow-agent
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: sysflow-agent
+data: 
+{{ (.Files.Glob "rules/*").AsConfig | indent 2 }}
+{{- end }} 
