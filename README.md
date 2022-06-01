@@ -5,5 +5,5 @@ This repository contains scripts for deploying the SysFlow telemetry pipeline. F
 - [Docker](https://sysflow.readthedocs.io/en/latest/docker.html)
 - [Helm](https://sysflow.readthedocs.io/en/latest/helm.html)
 - [OpenShift](https://sysflow.readthedocs.io/en/latest/operator.html)
-- [Binary packages (deb|rpm|tgz)](https://sysflow.readthedocs.io/en/latest/binary.html)
+- [Binary packages (deb|rpm)](https://sysflow.readthedocs.io/en/latest/binary.html)
 

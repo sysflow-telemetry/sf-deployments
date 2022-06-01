@@ -1,4 +1,4 @@
-# Binary packages
+# Binary packages (deb|rpm)
 
 SysFlow can be deployed directly on the host using its binary packages (since SysFlow 0.4.0).
 
