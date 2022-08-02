@@ -90,7 +90,7 @@ sfcollector:
   # Image repository
   repository: sysflowtelemetry/sf-collector
   # Image tag
-  tag: 0.4.0
+  tag: 0.4.4
   # Filter expression
   filter: '"container.type!=host and container.name!=sfprocessor and container.name!=sfcollector"'
   # Use this criPath if running docker runtime
@@ -127,10 +127,10 @@ sfprocessor:
   # Image repository
   repository: sysflowtelemetry/sf-processor
   # Image tag
-  tag: 0.4.0
+  tag: 0.4.4
   #Override processor exporter in pipeline.json
-  override: true 
-  # Export type (terminal|file|syslog)  
+  override: true
+  # Export type (terminal|file|syslog)
   export: syslog
   # rsyslog host address
   syslogHost: localhost
@@ -141,7 +141,7 @@ sfprocessor:
   # true if using config maps for policy configs
   configMapEnabled: true
   # directory where raw findings are written too.
-  # Must be the same as the findings.path value in the 
+  # Must be the same as the findings.path value in the
   # pipeline.json
   findingsDir: "/mnt/findings/"
 
@@ -149,12 +149,12 @@ sfprocessor:
 sfexporter:
   #enabled
   enabled: false
-  # Comment out if you always want to pull images 
+  # Comment out if you always want to pull images
   imagepullpolicy: Always
   # image repository
   repository: sysflowtelemetry/sf-exporter
   # image tag
-  tag: latest
+  tag: 0.4.4
   # export inverval
   interval: 5
   # directory where traces are read from inside container
@@ -164,16 +164,16 @@ sfexporter:
   # The directory to copy too.  This field only used with local
   # toDir: /mnt/sysflow/
   # directory where raw findings are written too.
-  # Must be the same as the findings.path value in the 
+  # Must be the same as the findings.path value in the
   # pipeline.json
   findingsDir: "/mnt/findings/"
   # mode
   mode: "move-del"
   # dirs
   dirs: "/mnt/data/"
-  # sets logging level, DEBUG, INFO, WARNING, ERROR, CRITICAL 
+  # sets logging level, DEBUG, INFO, WARNING, ERROR, CRITICAL
   log: "INFO"
-  
+
 
   # object store address (overridden by install script). Only used with "s3"
   s3Endpoint: "CHANGETHIS-COS_ENDPOINT"
