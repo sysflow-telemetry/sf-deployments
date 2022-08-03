@@ -80,7 +80,7 @@ spec:
         - name: POLICYENGINE_MODE
           value: alert
         - name: EXPORTER_FORMAT
-          value: json
+          value: "json"
         - name: EXPORTER_EXPORT
           value: {{ .Values.sfprocessor.export | default "terminal" | quote }}
         - name: EXPORTER_SYSLOG_TAG
@@ -184,6 +184,16 @@ spec:
         {{- else }}
         - name: FILE_READ_MODE
           value: "0"
+        {{- end }}
+        {{- if .Values.kubernetes.enabled }}
+        - name: SF_K8S_API_CERT
+          value: {{ .Values.kubernetes.apiAuth }}
+        - name: SF_K8S_API_URL
+          value: {{ .Values.kubernetes.apiUrl }}
+        {{- if .Values.kubernetes.enableK8sEvents }}
+        - name: SF_K8S_ENABLE_EVENTS
+          value: "1"
+        {{- end }}
         {{- end }}
         - name: NODE_NAME
           valueFrom:

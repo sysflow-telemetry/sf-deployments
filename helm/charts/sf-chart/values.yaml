@@ -81,7 +81,15 @@ resources:
 findings:
   enabled: false
 
-
+kubernetes:
+  # set to true to collect k8s meta data and possibly events     
+  enabled: false
+  # authentication method for connecting to the Kubernetes API.
+  apiAuth: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  # the URL used to connect to the Kubernetes API.
+  apiUrl: "https://$(KUBERNETES_SERVICE_HOST)"
+  # set to true to collect k8s events
+  enableK8sEvents: false
 
 
 sfcollector:
@@ -92,7 +100,7 @@ sfcollector:
   # Image tag
   tag: 0.4.0
   # Filter expression
-  filter: '"container.type!=host and container.name!=sfprocessor and container.name!=sfcollector"'
+  filter: "container.type!=host and container.name!=sfprocessor and container.name!=sfcollector"
   # Use this criPath if running docker runtime
   criPath: ""
   # Use this criPath if running containerd runtime
