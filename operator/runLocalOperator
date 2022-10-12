@@ -1,2 +1,0 @@
-#!/bin/bash
-operator-sdk run --local --kubeconfig=/home/terylt/.bluemix/plugins/container-service/clusters/oc3.11.146-cluster/kube-config-dal10-oc3.11.146-cluster.yml

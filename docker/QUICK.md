@@ -16,14 +16,14 @@ In edge processing configuration, SysFlow exports the collected telemetry as eve
     <img src="https://sysflow.readthedocs.io/en/latest/_static/SF_Collector_Processor.png" width="45%" height="45%" />
 </center>
 
-Instructions for `Docker Compose`, `Helm`, `OpenShift`, and `binary package` deployments of complete SysFlow stacks are available [here](https://sysflow.readthedocs.io/en/latest/deploy.html).
+Instructions for `Docker Compose`, `Helm`, and `binary package` deployments of complete SysFlow stacks are available [here](https://sysflow.readthedocs.io/en/latest/deploy.html).
 
 ### Inspecting collected traces
 
 A [command line utilitiy](https://hub.docker.com/r/sysflowtelemetry/sysprint) is provided for inspecting collected traces or convert traces from SysFlow's compact binary format into human-readable JSON or CSV formats.
 
 ```bash
-docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace> 
+docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint /mnt/data/<trace>
 ```
 
 where `trace` is the the name of the trace file inside `/mnt/data`. If empty, all files in `/mnt/data` are processed. By default, the traces are printed to the standard output with a default set of SysFlow attributes. For a complete list of options, run:
@@ -32,7 +32,7 @@ where `trace` is the the name of the trace file inside `/mnt/data`. If empty, al
 docker run --rm -v /mnt/data:/mnt/data sysflowtelemetry/sysprint  -h
 ```
 
-This command line tool can also be installed directly on the host using pip. 
+This command line tool can also be installed directly on the host using pip.
 
 ```bash
 python3 -m pip install sysflow-tools

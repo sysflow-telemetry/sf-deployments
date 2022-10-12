@@ -1,2 +1,0 @@
-#!/bin/bash
-ibmcloud ks cluster-config oc3.11.146-cluster
