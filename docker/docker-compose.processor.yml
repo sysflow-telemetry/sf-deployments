@@ -30,7 +30,8 @@ services:
       - /boot:/host/boot:ro 
       - /lib/modules:/host/lib/modules:ro 
       - /usr:/host/usr:ro 
-      - /etc:/host/etc:ro 
+      - /etc:/host/etc:ro
+      - /var/lib:/host/var/lib:ro
       - socket-vol:/sock/
     environment:            
       SOCK_FILE: /sock/sysflow.sock  
