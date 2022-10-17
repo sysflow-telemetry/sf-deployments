@@ -29,7 +29,7 @@ Then, start your cluster:
 minikube start
 ```
 
-> Note: to install SysFlow on minikube, set `sfcollector.ebpf` and `sfcollector.mountEtc` to `true` and change `sfcollector.tag` to `bpf` in `values.yaml` located inside each chart. 
+> Note: to install SysFlow on minikube, set `sfcollector.ebpf` and `sfcollector.mountEtc` to `true` in `values.yaml` located inside each chart. 
 
 Check the [minikube docs](https://minikube.sigs.k8s.io/docs/start/) for additional installation options.
 
@@ -120,7 +120,7 @@ To remove the SysFlow agent:
 
 Most of the defaults should work out of the box. The collector is currently set to rotating files in 5 min intervals (or 300 seconds). CGroup resource limits can be set on the collector, exporter, and processor to limit resource usage. These can be adjusted depending on requirements and resources limitations.
 
-> Note: `sfcollector.dropMode` is set to `true` by default for performance considerations. If tracking `mmap` is required, set it to `false`.
+> Note: `sfcollector.dropMode` is set to `true` by default for performance considerations.
 
 Kubernetes can use different container runtimes. Older versions used the docker runtime; however, newer versions typically run either containerd or crio.  It's important to know which runtime you have if you want to get the full benefits of SysFlow. You tell the collector which runtime you are using based on the sock file you refer to in the `criPath` variable. If you are using the `docker` runtime, leave `criPath` blank. If you are using containerd, set `criPath` to "/var/run/containerd/containerd.sock" and if you are using crio, set `criPath` to "/var/run/crio/crio.sock". If SysFlow files are empty or the container name variable is set to `incomplete` in SysFlow traces, this typically means that the runtime socket is not connected properly.
 
@@ -128,11 +128,11 @@ Kubernetes can use different container runtimes. Older versions used the docker 
 
 Below is the list of customizable attributes for the charts, organized by component. These can be modified directly into the `values.yaml` located in each chart's directory. They can also be set directly into the helm command invoked by our installation scripts through `--set <attribute>=<value>` parameters.
 
-#### SysFlow Collector (sf-exporter-chart | sf-processor-chart)
+#### SysFlow Collector
 
 | parameter | description | default |
 |-|-|-|
-| sfcollector.imagepullpolicy | Pull policy for image (Always\|Never\|IfNotPresent) | IfNotPresent |
+| sfcollector.imagepullpolicy | Pull policy for image (Always\|Never\|IfNotPresent) | Always |
 | sfcollector.repository | Image repository | sysflowtelemetry/sf-collector |
 | sfcollector.tag | Image tag | latest |
 | sfcollector.interval | Interval in seconds to roll new trace files | 300 |
@@ -145,32 +145,43 @@ Below is the list of customizable attributes for the charts, organized by compon
 | sfcollector.readMode | Sets mode for reads: `0` enables recording all file reads as flows. `1` disables all file reads.   `2` disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",  "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/". | 0 |
 | sfcollector.ebpf | Enables ebpf probe (required for minikube deployment) | false |
 | sfcollector.mountEtc | Mounts etc directory in container (required for minikube and Google COS) | false |
+| sfcollector.collectionMode | Template modes for enabling certain system calls. Currently supports 3 modes: flow" - full sysflows, "consume" - file reads, writes, closes turned off, "nofiles" - no fileevents or fileflows | flow |
+| sfcollector.enableStats | When enabled, logs stats on containers, processes, networkflows, fileflows and records written at interval set by "interval" attribute | false |
 
-#### SysFlow Exporter (sf-exporter-chart)
+#### SysFlow Exporter
 
 | parameter | description | default |
 |-|-|-|
-| sfexporter.imagepullpolicy | Pull policy for image (Always\|Never\|IfNotPresent) | IfNotPresent |
+| sfexporter.enabled | Indicates whether the exporter will be used in the k8s deployment | false |
+| sfexporter.imagepullpolicy | Pull policy for image (Always\|Never\|IfNotPresent) | Always |
 | sfexporter.repository | Image repository | sysflowtelemetry/sf-exporter |
 | sfexporter.tag | Image tag | latest |
-| sfexporter.interval | Interval in seconds to export trace files to S3 | 30 |
-| sfexporter.outDir | Directory from which exporter reads trace files | /mnt/data/ |
-| sfexporter.s3Endpoint | S3 host address | "\<ip address\>" |
-| sfexporter.s3Port | S3 port | 9000 |
-| sfexporter.s3Bucket | S3 bucket where to push traces | "\<s3 bucket\>" |
-| sfexporter.s3Location | S3 location | "\<s3 region\>" |
-| sfexporter.s3AccessKey | S3 access key | "\<s3 access key\>" |
-| sfexporter.s3SecretKey | S3 secret key | "\<s3 secret key\>" |
-| sfexporter.s3Secure | S3 connection, `true` if TLS-enabled, `false` otherwise | false |
+| sfexporter.log | Exporter logging level.  Can be DEBUG, INFO, WARNING, ERROR, CRITICAL | INFO |
+| sfexporter.type | Type of trace export - "s3" to export to S3 storage, "local" for local copy | s3 |
+| sfexporter.interval | Interval in seconds to check whether to export trace files | 5 |
+| sfexporter.outDir | Directory shared between the collector and exporter and where collector writes | /mnt/data/ |
+| sfexporter.dirs | Directories (comma separated) from which exporter will copy | /mnt/data |
+| sfexporter.toDir | Directories (comma separated)  to copy trace too - only used when type = "local". Must have same number of entries as dirs attribute | commented out |
+| sfexporter.mode | modes of copy (comma separated) move-del - move and delete file once finished writing - this is the only mode local copy supports. cont-update - continuously copy file over at interval (s3), cont-update-recur - continously update a directory structure recursively (s3). Must have same number of entries as dirs attribute | move-del |
+| sfexporter.s3Endpoint | S3 host address (only used when type s3) | "\<ip address\>" |
+| sfexporter.s3Port | S3 port (only used when type s3) | 443 |
+| sfexporter.s3Bucket | S3 bucket where to push traces (only used when type s3). Can be a comma separated list of buckets. Must have same number of entries as dirs attribute | "\<s3 bucket\>" |
+| sfexporter.s3Location | S3 location (only used when type s3) | "\<s3 region\>" |
+| sfexporter.s3AccessKey | S3 access key (only used when type s3) | "\<s3 access key\>" |
+| sfexporter.s3SecretKey | S3 secret key (only used when type s3) | "\<s3 secret key\>" |
+| sfexporter.s3Secure | S3 connection, `true` if TLS-enabled, `false` otherwise (only used when type s3) | false |
 
-#### SysFlow Processor (sf-processor-chart)
+#### SysFlow Processor
 
 | parameter | description | default |
 |-|-|-|
-| sfprocessor.imagepullpolicy | Pull policy for image (Always\|Never\|IfNotPresent) | IfNotPresent |
+| sfprocessor.imagepullpolicy | Pull policy for image (Always\|Never\|IfNotPresent) | Always |
 | sfprocessor.repository | Image repository | sysflowtelemetry/sf-processor |
 | sfprocessor.tag | Image tag | latest |
 | sfprocessor.export | Export type (`terminal`\|`file`\|`syslog`) | syslog |
+| sfprocessor.override | Override processor exporter in pipeline.json with values.yaml settings | true |
 | sfprocessor.syslogHost | rsyslog host address | localhost |
 | sfprocessor.syslogPort | rsyslog port | 514 |
 | sfprocessor.syslogProto | rsyslog protocol (`udp`\|`tcp`\|`tcp+tls`) | tcp |
+| sfprocessor.configMapEnabled | 'true' if using config map for policy configs | 'true' |
+| sfprocessor.findingsDir | Directory to which raw findings are written.  Must be the same as the findings.path value in the pipeline.json | /mnt/findings |
