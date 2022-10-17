@@ -90,9 +90,9 @@ sfcollector:
   # Image repository
   repository: sysflowtelemetry/sf-collector
   # Image tag
-  tag: 0.4.0
+  tag: latest
   # Filter expression
-  filter: '"container.type!=host and container.name!=sfprocessor and container.name!=sfcollector"'
+  filter: "container.type!=host and container.name!=sfprocessor and container.name!=sfcollector"
   # Use this criPath if running docker runtime
   criPath: ""
   # Use this criPath if running containerd runtime
@@ -118,6 +118,10 @@ sfcollector:
   outDir: /mnt/data/
   #sysflow file rotation interval
   interval: 300
+  #collection mode: "flow" - full sysflows, "consume" - file reads, writes, closes turned off, "nofiles" - no fileevents or fileflows.
+  collectionMode: "flow"
+  #enable stats: when enabled, logs stats on containers, process, file, cache and records written at interval set by "interval" attribute.
+  enableStats: false
 
 sfprocessor:
   # Enabled
@@ -127,7 +131,7 @@ sfprocessor:
   # Image repository
   repository: sysflowtelemetry/sf-processor
   # Image tag
-  tag: 0.4.0
+  tag: latest
   #Override processor exporter in pipeline.json
   override: true 
   # Export type (terminal|file|syslog)  

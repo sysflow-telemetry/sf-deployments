@@ -159,6 +159,14 @@ spec:
           value: ""
         - name: CRI_TIMEOUT
           value: "5"
+        {{- if .Values.sfcollector.enableStats }}
+        - name: STATS
+          value: "1"
+        {{- end }}
+        {{- if .Values.sfcollector.collectionMode }}
+        - name: MODE
+          value: {{ .Values.sfcollector.collectionMode | quote }}
+        {{- end }}
         {{- if .Values.sfcollector.ebpf }}
         - name: FALCO_BPF_PROBE
           value: ""
@@ -252,9 +260,17 @@ spec:
         - mountPath: /host/usr
           name: usr
           readOnly: true
+        - mountPath: /host/var/lib
+          name: varlib
+          readOnly: true
         - mountPath: /host/etc
           name: etc-fs
           readOnly: true
+        {{- if not .Values.sfcollector.ebpf }}
+        - mountPath: /sys/module
+          name: sysmodule
+          readOnly: false
+        {{- end }}
         securityContext:
           allowPrivilegeEscalation: true
           privileged: true
@@ -421,6 +437,14 @@ spec:
       - name: usr
         hostPath:
           path: /usr
+      - name: varlib
+        hostPath:
+          path: /var/lib
+      {{- if not .Values.sfcollector.ebpf }}
+      - name: sysmodule 
+        hostPath:
+          path: /sys/module
+      {{- end -}}
       {{- if and (eq .Values.sfprocessor.configMapEnabled true) (eq .Values.sfprocessor.enabled true) }}
       - name: sf-policy-volume
         configMap:
