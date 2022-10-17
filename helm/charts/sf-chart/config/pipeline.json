@@ -4,7 +4,8 @@
      "processor": "sysflowreader",
      "handler": "flattener",
      "in": "sysflow sysflowchan",
-     "out": "flat flattenerchan"
+     "out": "flat flattenerchan",
+     "filter.enabled": "on"
     },
     {
      "processor": "policyengine",
