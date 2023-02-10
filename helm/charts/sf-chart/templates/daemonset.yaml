@@ -156,7 +156,7 @@ spec:
         - name: INTERVAL
           value: "{{ .Values.sfcollector.interval }}"
         - name: CRI_PATH
-          value: ""
+          value: "{{ .Values.sfcollector.criPath }}"
         - name: CRI_TIMEOUT
           value: "5"
         {{- if .Values.sfcollector.enableStats }}
