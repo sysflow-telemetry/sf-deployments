@@ -110,8 +110,8 @@ sfcollector:
   # "2" disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",
   # "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/"
   readMode: "2"
-  # enables ebpf probe (required for minikube)
-  ebpf: false
+  # driver type can be kmod, ebpf (required for minikube), or ebpf-core
+  driverType: "ebpf"
   # mounts /etc directory in container (required for minikube and Google COS)
   mountEtc: true
   # directory where traces are written inside container

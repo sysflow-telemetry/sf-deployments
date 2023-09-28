@@ -52,6 +52,7 @@ services:
       FILTER: ${FILTER}
       INTERVAL: 300 
       SOCK_FILE: /sock/sysflow.sock
+      DRIVER_TYPE: "ebpf"
 volumes:
   socket-vol:
 networks:
