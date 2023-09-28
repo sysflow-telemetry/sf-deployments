@@ -29,7 +29,7 @@ Then, start your cluster:
 minikube start
 ```
 
-> Note: to install SysFlow on minikube, set `sfcollector.ebpf` and `sfcollector.mountEtc` to `true` in `values.yaml` located inside each chart. 
+> Note: to install SysFlow on minikube, set `sfcollector.driverType` to `ebpf` and `sfcollector.mountEtc` to `true` in `values.yaml` located inside each chart. 
 
 Check the [minikube docs](https://minikube.sigs.k8s.io/docs/start/) for additional installation options.
 
@@ -143,7 +143,7 @@ Below is the list of customizable attributes for the charts, organized by compon
 | sfcollector.fileOnly | Filters out any descriptor that is not a file, including unix sockets and pipes | false |
 | sfcollector.procFlow | Enables the creation of process flows | false |
 | sfcollector.readMode | Sets mode for reads: `0` enables recording all file reads as flows. `1` disables all file reads.   `2` disables recording file reads to noisy directories: "/proc/", "/dev/", "/sys/", "//sys/",  "/lib/",  "/lib64/", "/usr/lib/", "/usr/lib64/". | 0 |
-| sfcollector.ebpf | Enables ebpf probe (required for minikube deployment) | false |
+| sfcollector.driverType | Sets the driver type to kmod (kernel module), ebpf (ebpf probe - required for minikube deployment), or ebpf-core (CORE ebpf) | ebpf |
 | sfcollector.mountEtc | Mounts etc directory in container (required for minikube and Google COS) | false |
 | sfcollector.collectionMode | Template modes for enabling certain system calls. Currently supports 3 modes: flow" - full sysflows, "consume" - file reads, writes, closes turned off, "nofiles" - no fileevents or fileflows | flow |
 | sfcollector.enableStats | When enabled, logs stats on containers, processes, networkflows, fileflows and records written at interval set by "interval" attribute | false |

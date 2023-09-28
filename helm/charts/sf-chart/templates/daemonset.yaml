@@ -167,10 +167,8 @@ spec:
         - name: MODE
           value: {{ .Values.sfcollector.collectionMode | quote }}
         {{- end }}
-        {{- if .Values.sfcollector.ebpf }}
-        - name: FALCO_BPF_PROBE
-          value: ""
-        {{- end }}
+        - name: DRIVER_TYPE
+          value: {{ .Values.sfcollector.driverType | quote }}
         {{- if .Values.sfcollector.dropMode }}
         - name: ENABLE_DROP_MODE
           value: "1"
@@ -266,7 +264,7 @@ spec:
         - mountPath: /host/etc
           name: etc-fs
           readOnly: true
-        {{- if not .Values.sfcollector.ebpf }}
+        {{- if .Values.sfcollector.driverType "kmod" }}
         - mountPath: /sys/module
           name: sysmodule
           readOnly: false
@@ -440,7 +438,7 @@ spec:
       - name: varlib
         hostPath:
           path: /var/lib
-      {{- if not .Values.sfcollector.ebpf }}
+      {{- if .Values.sfcollector.driverType "kmod" }}
       - name: sysmodule 
         hostPath:
           path: /sys/module
