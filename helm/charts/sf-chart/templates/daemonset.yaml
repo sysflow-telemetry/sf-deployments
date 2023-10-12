@@ -264,7 +264,7 @@ spec:
         - mountPath: /host/etc
           name: etc-fs
           readOnly: true
-        {{- if .Values.sfcollector.driverType "kmod" }}
+        {{- if eq .Values.sfcollector.driverType "kmod" }}
         - mountPath: /sys/module
           name: sysmodule
           readOnly: false
@@ -438,7 +438,7 @@ spec:
       - name: varlib
         hostPath:
           path: /var/lib
-      {{- if .Values.sfcollector.driverType "kmod" }}
+      {{- if eq .Values.sfcollector.driverType "kmod" }}
       - name: sysmodule 
         hostPath:
           path: /sys/module
