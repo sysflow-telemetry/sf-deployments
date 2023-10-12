@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+{{- if eq .Values.sfcollector.driverType "kmod" }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -53,3 +54,4 @@ spec:
   hostNetwork: false
   hostPID: false
   restartPolicy: Never
+{{- end }}
